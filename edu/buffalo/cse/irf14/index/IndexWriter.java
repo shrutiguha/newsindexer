@@ -3,7 +3,10 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.Tokenizer;
+import edu.buffalo.cse.irf14.analysis.TokenStream;
 import edu.buffalo.cse.irf14.document.Document;
+import edu.buffalo.cse.irf14.document.FieldNames;
 
 /**
  * @author nikhillo
@@ -28,6 +31,55 @@ public class IndexWriter {
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
+		Tokenizer tokenizer = new Tokenizer();
+				
+		try{
+			/*String fileids[] = d.getField(FieldNames.FILEID);
+			for (String fileid : fileids) {
+				
+			}
+			
+			String categories[] = d.getField(FieldNames.CATEGORY);
+			for (String category : categories) {
+				
+			}*/
+			
+			String titles[] = d.getField(FieldNames.TITLE);
+			for (String title : titles) {
+				TokenStream titleTS = tokenizer.consume(title);
+			}
+			
+			/*String authors[] = d.getField(FieldNames.AUTHOR);
+			for (String author : authors) {
+				
+			}
+			
+			String authorOrgs[] = d.getField(FieldNames.AUTHORORG);
+			for (String authorOrg : authorOrgs) {
+				
+			}
+			
+			String places[] = d.getField(FieldNames.PLACE);
+			for (String place : places) {
+				
+			}
+			
+			String newsDate[] = d.getField(FieldNames.NEWSDATE);
+			for (String newsdate : newsDate) {
+				
+			}
+			
+			String content[] = d.getField(FieldNames.CONTENT);
+			for (String con : content) {
+				
+			}*/
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	/**

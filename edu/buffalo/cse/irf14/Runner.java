@@ -30,6 +30,7 @@ public class Runner {
 	public static void main(String[] args) {
 		String ipDir = args[0];
 		String indexDir = args[1];
+		
 		//more? idk!
 		
 		File ipDirectory = new File(ipDir);
