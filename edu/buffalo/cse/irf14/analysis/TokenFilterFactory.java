@@ -23,7 +23,7 @@ public class TokenFilterFactory {
 	 */
 	public static TokenFilterFactory getInstance() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		return new TokenFilterFactory();
 	}
 	
 	/**
@@ -36,6 +36,17 @@ public class TokenFilterFactory {
 	 */
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		switch(type)
+		{
+			case SYMBOL: return new SymbolTokenFilter(stream);
+			case DATE: return new DateTokenFilter(stream);
+			case NUMERIC: return new NumericTokenFilter(stream);
+			case CAPITALIZATION: return new CapitalizationTokenFilter(stream);
+			case STOPWORD: return new StopWordTokenFilter(stream);
+			case STEMMER: return new StemmerTokenFilter(stream);
+			case ACCENT: return new AccentTokenFilter(stream);
+			case SPECIALCHARS: return new SpecialCharTokenFilter(stream);
+			default: return null;
+		}
 	}
 }

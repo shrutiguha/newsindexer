@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -36,19 +37,23 @@ public class Parser {
 				throw new ParserException();
 			else
 			{
-				BufferedReader br = new BufferedReader(new FileReader(filename));
 				filename = filename.replace('\\', '/');
 				String fileArray[] = filename.split("/");
 				int fileArrayLength = fileArray.length;
 				if(fileArrayLength > 0)
 				{
 					String fileid = fileArray[fileArrayLength-1]; 
-//					if(!checkFile(fileid))
-//						throw new ParserException();
+					Pattern pattern = Pattern.compile("[^.\\:*$?\"<>%^|]+[.][a-zA-Z]*");
+					boolean matches=true;
+					matches= pattern.matcher(fileid).find();
+					if(matches)
+						throw new ParserException();
 					d.setField(FieldNames.FILEID, fileid);
 				}
 				if(fileArrayLength > 1)
 					d.setField(FieldNames.CATEGORY, fileArray[fileArrayLength-2]);
+				
+				BufferedReader br = new BufferedReader(new FileReader(filename));
 							
 				while ((line = br.readLine()) != null)   
 				{
@@ -111,11 +116,5 @@ public class Parser {
 			e.printStackTrace();
 		}
 		return d;
-	}
-	
-	public static boolean checkFile(String file)
-	{
-		Pattern pattern = Pattern.compile("[^/./\\:*?\"<>|]");
-	    return !pattern.matcher(file).find();
 	}
 }

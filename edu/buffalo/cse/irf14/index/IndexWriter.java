@@ -3,8 +3,12 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.TokenFilter;
+import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
+import edu.buffalo.cse.irf14.analysis.TokenFilterType;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
+import edu.buffalo.cse.irf14.analysis.TokenizerException;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.FieldNames;
 
@@ -13,12 +17,15 @@ import edu.buffalo.cse.irf14.document.FieldNames;
  * Class responsible for writing indexes to disk
  */
 public class IndexWriter {
+	
+	private String indexDir;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
 	 */
 	public IndexWriter(String indexDir) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		this.indexDir = indexDir;
 	}
 	
 	/**
@@ -28,6 +35,7 @@ public class IndexWriter {
 	 * for each indexable field within the document. 
 	 * @param d : The Document to be added
 	 * @throws IndexerException : In case any error occurs
+	 * @throws TokenizerException 
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
@@ -76,11 +84,24 @@ public class IndexWriter {
 				stream.append(tokenizer.consume(con));
 			}
 			
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, stream);
+			if(filter != null)
+			{
+				while (filter.increment()) {
+					
+				}
+				stream = filter.getStream();
+			}
+			
+			stream.reset();
+			
 		}
 		catch(Exception e)
 		{
 			
 		}
+		
 
 	}
 	
