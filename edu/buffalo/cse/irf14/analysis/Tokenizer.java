@@ -3,7 +3,6 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
-import java.util.ArrayList;
 
 /**
  * @author nikhillo
@@ -14,6 +13,7 @@ public class Tokenizer {
 	 * Default constructor. Assumes tokens are whitespace delimited
 	 */
 	private String delimiter;
+	private String fileId;
 	
 	public Tokenizer() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
@@ -45,16 +45,29 @@ public class Tokenizer {
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		if(str == null || str.equals(""))
+			throw new TokenizerException();
+		
+		Token token;
 		
 		String splitArray[] = str.split(delimiter);
 		TokenStream tokenStream = new TokenStream();
 		
 		for (String splitText : splitArray) {
-			Token t = new Token();
-			t.setTermText(splitText);
-			tokenStream.add(t);
+			token = new Token();
+			token.setTermText(splitText);
+			token.setFileId(this.fileId);
+			tokenStream.add(token);
 		}
 		
 		return tokenStream;
+	}
+	
+	public String getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(String fileId) {
+		this.fileId = fileId;
 	}
 }

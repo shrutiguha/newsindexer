@@ -20,12 +20,17 @@ public class TokenStream implements Iterator<Token>{
 	public TokenStream()
 	{
 		this.tokenList = new ArrayList<Token>();
-		this.index = 0;
+		this.index = -1;
 	}
 	
 	public void add(Token token)
 	{
 		this.tokenList.add(token);
+	}
+	
+	public int size()
+	{
+		return this.tokenList.size();			
 	}
 	
 	/**
@@ -54,8 +59,8 @@ public class TokenStream implements Iterator<Token>{
 	public Token next() {
 		// TODO YOU MUST IMPLEMENT THIS
 		try{
-			Token t = this.tokenList.get(this.index);
 			this.index++;
+			Token t = this.tokenList.get(this.index);
 			return t;
 		}
 		catch(IndexOutOfBoundsException e)
@@ -73,9 +78,11 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public void remove() {
 		// TODO YOU MUST IMPLEMENT THIS
-		int removeIndex = this.index-1;
+		int removeIndex = this.index;
 		if(removeIndex >= 0 && removeIndex < tokenList.size())
-			tokenList.remove(removeIndex);		
+		{
+			tokenList.set(removeIndex, null);
+		}
 	}
 	
 	/**
@@ -85,7 +92,17 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		this.index = 0;
+		this.index = -1;
+		while(this.hasNext())
+		{
+			if(this.next() == null)
+			{
+				this.tokenList.remove(index);
+				this.index--;
+			}
+		}
+		
+		this.index = -1;
 	}
 	
 	/**
@@ -99,6 +116,23 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void append(TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		if(stream != null)
+		{
+			stream.reset();
+			int pos = this.tokenList.size();
+			if(pos < 0)
+				pos = 0;
+			
+			while(stream.hasNext())
+			{
+				Token t = stream.next();
+				if(t != null)
+				{
+					this.tokenList.add(pos, t);
+					pos++;
+				}
+			}
+		}
 	}
 	
 	/**

@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -33,14 +32,11 @@ public class Parser {
 			String content = new String();
 			boolean title= false, placeDate = false;
 			
-			if(filename == null)
-				throw new ParserException();
-			else if(filename == "")
+			if(filename == null || filename.equals(""))
 				throw new ParserException();
 			else
 			{
 				BufferedReader br = new BufferedReader(new FileReader(filename));
-				
 				filename = filename.replace('\\', '/');
 				String fileArray[] = filename.split("/");
 				int fileArrayLength = fileArray.length;
@@ -101,7 +97,8 @@ public class Parser {
 		            }
 				}
 				
-				d.setField(FieldNames.CONTENT, content);			
+				d.setField(FieldNames.CONTENT, content);
+				
 				br.close();
 			}
 		} 

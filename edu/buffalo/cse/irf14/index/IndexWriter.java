@@ -32,54 +32,56 @@ public class IndexWriter {
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
 		Tokenizer tokenizer = new Tokenizer();
+		TokenStream stream = new TokenStream();
 				
 		try{
-			/*String fileids[] = d.getField(FieldNames.FILEID);
+			String fileids[] = d.getField(FieldNames.FILEID);
+			tokenizer.setFileId(fileids[0]);
 			for (String fileid : fileids) {
-				
+				stream.append(tokenizer.consume(fileid));
 			}
 			
 			String categories[] = d.getField(FieldNames.CATEGORY);
 			for (String category : categories) {
-				
-			}*/
+				stream.append(tokenizer.consume(category));
+			}
 			
 			String titles[] = d.getField(FieldNames.TITLE);
 			for (String title : titles) {
-				TokenStream titleTS = tokenizer.consume(title);
+				stream.append(tokenizer.consume(title));
 			}
 			
-			/*String authors[] = d.getField(FieldNames.AUTHOR);
+			String authors[] = d.getField(FieldNames.AUTHOR);
 			for (String author : authors) {
-				
+				stream.append(tokenizer.consume(author));
 			}
 			
 			String authorOrgs[] = d.getField(FieldNames.AUTHORORG);
 			for (String authorOrg : authorOrgs) {
-				
+				stream.append(tokenizer.consume(authorOrg));
 			}
 			
 			String places[] = d.getField(FieldNames.PLACE);
 			for (String place : places) {
-				
+				stream.append(tokenizer.consume(place));
 			}
 			
 			String newsDate[] = d.getField(FieldNames.NEWSDATE);
 			for (String newsdate : newsDate) {
-				
+				stream.append(tokenizer.consume(newsdate));
 			}
 			
 			String content[] = d.getField(FieldNames.CONTENT);
 			for (String con : content) {
-				
-			}*/
+				stream.append(tokenizer.consume(con));
+			}
+			
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			
 		}
-		
-		
+
 	}
 	
 	/**

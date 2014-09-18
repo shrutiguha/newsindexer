@@ -16,6 +16,7 @@ public class Token {
 	private String termText;
 	//The char array backing termText
 	private char[] termBuffer;
+	private String fileId;
 	
 	/**
 	 * Method to set the termText to given text.
@@ -57,6 +58,14 @@ public class Token {
 		return termBuffer;
 	}
 	
+	public String getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(String fileId) {
+		this.fileId = fileId;
+	}
+	
 	/**
 	 * Method to merge this token with the given array of Tokens
 	 * You are free to update termText and termBuffer as you please
@@ -84,6 +93,6 @@ public class Token {
 	@Override
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		return this.termText;
 	}
 }

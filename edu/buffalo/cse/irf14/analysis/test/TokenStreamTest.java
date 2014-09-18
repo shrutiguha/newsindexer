@@ -160,6 +160,7 @@ public class TokenStreamTest {
 		assertNotNull(t);
 		assertEquals("this", t.toString());
 		stream.reset();
+		
 		//no-op on empty stream
 		while (stream.hasNext()) {
 			stream.next();
