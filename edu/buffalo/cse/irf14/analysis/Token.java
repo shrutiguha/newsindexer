@@ -76,6 +76,13 @@ public class Token {
 	 */
 	protected void merge(Token...tokens) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		if(tokens != null)
+		{
+			for(int i=0;i<tokens.length;i++)
+				this.termText += " " + tokens[i];
+			
+			this.termBuffer = (this.termText != null) ? this.termText.toCharArray() : null;
+		}
 	}
 	
 	/**
