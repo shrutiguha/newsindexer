@@ -75,11 +75,6 @@ public class Token {
 	 * @param tokens The token array to be merged
 	 */
 	protected void merge(String text1,String text2) {
-		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		//String text1=t1.getTermText();
-	//	String text2=t2.getTermText();
-		String text=text1+" "+text2;
-		this.setTermText(text);
 		
 		
 	}
