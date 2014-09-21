@@ -25,7 +25,7 @@ public class IndexWriter {
 	 */
 	public IndexWriter(String indexDir) {
 		//TODO : YOU MUST IMPLEMENT THIS
-		this.indexDir = indexDir;
+		this.setIndexDir(indexDir);
 	}
 	
 	/**
@@ -40,61 +40,63 @@ public class IndexWriter {
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
 		Tokenizer tokenizer = new Tokenizer();
-		TokenStream stream = new TokenStream();
+		TokenStream fileIdStream = new TokenStream();
+		TokenStream categoryStream = new TokenStream();
+		TokenStream termStream = new TokenStream();
 				
 		try{
 			String fileids[] = d.getField(FieldNames.FILEID);
 			tokenizer.setFileId(fileids[0]);
 			for (String fileid : fileids) {
-				stream.append(tokenizer.consume(fileid));
+				fileIdStream.append(tokenizer.consume(fileid));
 			}
 			
 			String categories[] = d.getField(FieldNames.CATEGORY);
 			for (String category : categories) {
-				stream.append(tokenizer.consume(category));
+				categoryStream.append(tokenizer.consume(category));
 			}
 			
 			String titles[] = d.getField(FieldNames.TITLE);
 			for (String title : titles) {
-				stream.append(tokenizer.consume(title));
+				termStream.append(tokenizer.consume(title));
 			}
 			
 			String authors[] = d.getField(FieldNames.AUTHOR);
 			for (String author : authors) {
-				stream.append(tokenizer.consume(author));
+				termStream.append(tokenizer.consume(author));
 			}
 			
 			String authorOrgs[] = d.getField(FieldNames.AUTHORORG);
 			for (String authorOrg : authorOrgs) {
-				stream.append(tokenizer.consume(authorOrg));
+				termStream.append(tokenizer.consume(authorOrg));
 			}
 			
 			String places[] = d.getField(FieldNames.PLACE);
 			for (String place : places) {
-				stream.append(tokenizer.consume(place));
+				termStream.append(tokenizer.consume(place));
 			}
 			
 			String newsDate[] = d.getField(FieldNames.NEWSDATE);
 			for (String newsdate : newsDate) {
-				stream.append(tokenizer.consume(newsdate));
+				termStream.append(tokenizer.consume(newsdate));
 			}
 			
 			String content[] = d.getField(FieldNames.CONTENT);
 			for (String con : content) {
-				stream.append(tokenizer.consume(con));
+				termStream.append(tokenizer.consume(con));
 			}
 			
 			TokenFilterFactory factory = TokenFilterFactory.getInstance();
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, stream);
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, termStream);
 			if(filter != null)
 			{
 				while (filter.increment()) {
 					
 				}
-				stream = filter.getStream();
+				termStream = filter.getStream();
 			}
 			
-			stream.reset();
+			termStream.reset();
 			
 		}
 		catch(Exception e)
@@ -112,5 +114,13 @@ public class IndexWriter {
 	 */
 	public void close() throws IndexerException {
 		//TODO
+	}
+
+	public String getIndexDir() {
+		return indexDir;
+	}
+
+	public void setIndexDir(String indexDir) {
+		this.indexDir = indexDir;
 	}
 }
