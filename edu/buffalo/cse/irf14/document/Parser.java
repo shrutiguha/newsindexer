@@ -23,7 +23,7 @@ public class Parser {
 	 */
 	public static Document parse(String filename) throws ParserException {
 	// TODO YOU MUST IMPLEMENT THIS
-	System.out.println(filename+"...dsd");
+	
 	Document d = new Document();
 	
 	try 
@@ -33,75 +33,28 @@ public class Parser {
 	String content = new String();
 	boolean title= false, placeDate = false;
 	
-	if(filename == null)
-	throw new ParserException();
-	else if(filename == "")
+	if(filename == null || filename.equals(""))
 	throw new ParserException();
 	else
 	{
-		String dfilename=filename;
-	//BufferedReader br = new BufferedReader(new FileReader(filename));
-	System.out.println(dfilename);
-	dfilename = dfilename.replace('\\', '/');
-	System.out.println(dfilename);
-	String fileArray[] = dfilename.split("/");
+	filename = filename.replace('\\', '/');
+	String fileArray[] = filename.split("/");
 	int fileArrayLength = fileArray.length;
-	System.out.println(fileArray.length);
-	//System.out.println(fileArray[fileArrayLength-1]+"___"+fileArray[fileArrayLength-2]);
 	if(fileArrayLength > 0)
 	{
-		System.out.println(fileArray[fileArrayLength-1]);
-	String fileid = fileArray[fileArrayLength-1];
-	//boolean a=false;
-	System.out.println(fileid);
-	//int a=0;
-	//System.out.println(a);
-	//a=fileid.contains("$");
-	//System.out.println(a);
-//	if(fileid.contains("$"))
-//	{
-//		throw new ParserException();
-//	}
-//	else if(fileid.contains("^"))
-//	{
-//			throw new ParserException();
-//		}
-//	else if(fileid.contains("%"))
-//	{
-//			throw new ParserException();
-//		}
-//	else if(fileid.contains(":"))
-//	{
-//			throw new ParserException();
-//		}
-//	else if(fileid.contains("*"))
-//	{
-//			throw new ParserException();
-//		}
-//	else if(fileid.contains("^"))
-//	{
-//			throw new ParserException();
-//		}
-		
-	//boolean match= fileid.matches("[^.\\:*$?\"<>%^|]+[.][a-zA-Z]*");
-Pattern pattern = Pattern.compile("[^.\\:*$?\"<>%^|]+[.][a-zA-Z]+");
-Matcher matcher = pattern.matcher(fileid);
-boolean matches=true;
-matches= pattern.matcher(fileid).find();
-System.out.println(matches);
-if(matches)
-    	throw new ParserException();
-//if(!checkFile(fileid))
-	//throw new ParserException();
-	
+	String fileid = fileArray[fileArrayLength-1]; 
+	Pattern pattern = Pattern.compile("[^.\\:*$?\"<>%^|]+[.][a-zA-Z]*");
+	boolean matches=true;
+	matches= pattern.matcher(fileid).find();
+	if(matches)
+	throw new ParserException();
 	d.setField(FieldNames.FILEID, fileid);
 	}
 	if(fileArrayLength > 1)
-	{
-		System.out.println(fileArray[fileArrayLength-2]);
 	d.setField(FieldNames.CATEGORY, fileArray[fileArrayLength-2]);
-	}
+	
 	BufferedReader br = new BufferedReader(new FileReader(filename));
+	
 	while ((line = br.readLine()) != null)   
 	{
 	            if(line.isEmpty())
@@ -149,7 +102,8 @@ if(matches)
 	            }
 	}
 	
-	d.setField(FieldNames.CONTENT, content);	
+	d.setField(FieldNames.CONTENT, content);
+	
 	br.close();
 	}
 	} 
@@ -163,10 +117,4 @@ if(matches)
 	}
 	return d;
 	}
-	
-	/*public static boolean checkFile(String file)
-	{
-	Pattern pattern = Pattern.compile("[^/./\\:*?\"<>|][.][a-zA-Z]*");
-	    return pattern.matcher(file).find();
-	}*/
 }

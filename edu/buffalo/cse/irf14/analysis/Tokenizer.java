@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+
 /**
  * @author nikhillo
  * Class that converts a given string into a {@link TokenStream} instance
@@ -11,8 +12,12 @@ public class Tokenizer {
 	/**
 	 * Default constructor. Assumes tokens are whitespace delimited
 	 */
+	private String delimiter;
+	private String fileId;
+	
 	public Tokenizer() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		this.delimiter = " ";
 	}
 	
 	/**
@@ -21,6 +26,7 @@ public class Tokenizer {
 	 */
 	public Tokenizer(String delim) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		this.delimiter = delim;
 	}
 	
 	/**
@@ -39,6 +45,31 @@ public class Tokenizer {
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		if(str == null || str.equals(""))
+			throw new TokenizerException();
+		
+		Token token;
+		
+		String splitArray[] = str.split(delimiter);
+		TokenStream tokenStream = new TokenStream();
+		
+		for (String splitText : splitArray) {
+			token = new Token();
+			token.setTermText(splitText);
+			token.setFileId(this.fileId);
+
+			tokenStream.add(token);
+
+		}
+		
+		return tokenStream;
+	}
+	
+	public String getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(String fileId) {
+		this.fileId = fileId;
 	}
 }
