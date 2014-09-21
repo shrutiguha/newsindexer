@@ -19,13 +19,15 @@ import edu.buffalo.cse.irf14.document.FieldNames;
 public class IndexWriter {
 	
 	private String indexDir;
+	//This parameter contains the address of the folder where everything needs to be stored.
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
 	 */
 	public IndexWriter(String indexDir) {
 		//TODO : YOU MUST IMPLEMENT THIS
-		this.setIndexDir(indexDir);
+		//If there is a parameter passed, assign it to the variable.
+		this.indexDir = indexDir;
 	}
 	
 	/**
@@ -39,6 +41,8 @@ public class IndexWriter {
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
+		//Here we add a document for indexing so before we add it we need to tokenize it and filter it and that filtered one will be added.
+		// Hence we call Tokenizer where the delim is set to default or to the specified one
 		Tokenizer tokenizer = new Tokenizer();
 		TokenStream fileIdStream = new TokenStream();
 		TokenStream categoryStream = new TokenStream();
@@ -87,16 +91,25 @@ public class IndexWriter {
 			}
 			
 			TokenFilterFactory factory = TokenFilterFactory.getInstance();
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, termStream);
+
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.DATE, termStream);
+			
+			System.out.println("s");
+
+			System.out.println(termStream);
+
 			if(filter != null)
 			{
 				while (filter.increment()) {
 					
 				}
 				termStream = filter.getStream();
+
+				System.out.println(termStream);
 			}
 			
 			termStream.reset();
+			
 			
 		}
 		catch(Exception e)

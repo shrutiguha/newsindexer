@@ -16,6 +16,7 @@ public class TokenStream implements Iterator<Token>{
 	
 	private ArrayList<Token> tokenList;
 	private int index;
+	private int current;
 	
 	public TokenStream()
 	{
@@ -24,6 +25,7 @@ public class TokenStream implements Iterator<Token>{
 	}
 	
 	public void add(Token token)
+
 	{
 		this.tokenList.add(token);
 	}
@@ -47,7 +49,42 @@ public class TokenStream implements Iterator<Token>{
 		
 		return false;
 	}
+	/**
+	 * Method that checks if there is any Token behind this token in the stream
+	 * with regards to the current pointer.
+	 * DOES NOT ADVANCE THE POINTER
+	 * @return true if at least one Token exists, false otherwise
+	 */
+	
+	public boolean hasPrevious() {
+		// TODO YOU MUST IMPLEMENT THIS
+		if(this.index>0)
+			return true;
+		
+		return false;
+	}
+	/**
+	 * Method increments the pointer
+	 */
+	
+	public void moveNext() {
+		// TODO YOU MUST IMPLEMENT THIS
+		if(this.index < this.tokenList.size()-1)
+			index++;
 
+	}
+	/**
+	 * Method decrements the pointer
+	 */
+	
+	public void moveBack() {
+		// TODO YOU MUST IMPLEMENT THIS
+		if(this.index>0)
+			index--;
+
+	}
+
+	
 	/**
 	 * Method to return the next Token in the stream. If a previous
 	 * hasNext() call returned true, this method must return a non-null
@@ -84,6 +121,42 @@ public class TokenStream implements Iterator<Token>{
 			tokenList.set(removeIndex, null);
 		}
 	}
+	/**
+	 * Method to get the previous Token from the stream.
+	 
+	 */
+	public Token previous() {
+		// TODO YOU MUST IMPLEMENT THIS
+		try{
+			this.index--;
+			Token t = this.tokenList.get(this.index);
+			return t;
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * Method to save current index
+	 
+	 */
+	public void saveCurrent() {
+		// TODO YOU MUST IMPLEMENT THIS
+		this.current=this.index;
+	}
+	
+	/**
+	 * Method to reset current index
+	 
+	 */
+	public void setCurrent() {
+		// TODO YOU MUST IMPLEMENT THIS
+		this.index=this.current;
+	}
+	
+	
 	
 	/**
 	 * Method to reset the stream to bring the iterator back to the beginning
@@ -93,6 +166,7 @@ public class TokenStream implements Iterator<Token>{
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
 		this.index = -1;
+		this.current=-1;
 		while(this.hasNext())
 		{
 			if(this.next() == null)

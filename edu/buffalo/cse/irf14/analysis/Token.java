@@ -75,7 +75,7 @@ public class Token {
 	 * @param tokens The token array to be merged
 	 */
 	protected void merge(Token...tokens) {
-		//TODO : YOU MUST IMPLEMENT THIS METHOD
+ 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		if(tokens != null)
 		{
 			for(int i=0;i<tokens.length;i++)
@@ -83,7 +83,7 @@ public class Token {
 			
 			this.termBuffer = (this.termText != null) ? this.termText.toCharArray() : null;
 		}
-	}
+ 	}
 	
 	/**
 	 * Returns the string representation of this token. It must adhere to the

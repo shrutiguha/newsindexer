@@ -57,7 +57,9 @@ public class Tokenizer {
 			token = new Token();
 			token.setTermText(splitText);
 			token.setFileId(this.fileId);
+
 			tokenStream.add(token);
+
 		}
 		
 		return tokenStream;

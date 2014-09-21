@@ -25,7 +25,46 @@ public class SymbolTokenFilter extends TokenFilter {
 	
 	public void filter(Token t)
 	{
+		//Where i add the filter part
 		String text = t.getTermText();
+		
+		System.out.println(text);
+		
+		//Punctuation
+		text=text.replaceAll(". ", "");
+		text=text.replaceAll("! ", "");
+		text=text.replaceAll("[.?!]+$", "");
+
+		//basic rules
+		text=text.replaceAll("'s", "");
+		//contractions
+		text= text.replaceAll("shan't$","shall not");
+		text= text.replaceAll("won't$","will not");
+		text= text.replaceAll("'ve$"," have");
+		text= text.replaceAll("n't$"," not");
+		text= text.replaceAll("'ll$"," will");
+		text= text.replaceAll("'re$"," are");
+		text= text.replaceAll("'d$"," would");
+		text= text.replaceAll("'m$"," am");
+		text= text.replaceAll("'em$"," them");
+		text= text.replaceAll(" 'em$","them");
+		text= text.replaceAll("shan't$","shall not");
+		text= text.replaceAll("won't","will not");
+		text=text.replaceAll("'", "");
+		
+		//Hyphens
+		
+		if(text.matches("[a-zA-Z]+-[a-zA-Z]+"))
+			text=text.replaceAll("-", " ");
+			else if(!text.matches("[^a-zA-Z0-9]*[a-zA-Z0-9]+[-][a-zA-Z0-9]+[^a-zA-Z0-9]*"))
+				text=text.replaceAll("-+", "");
+			//if(!text.matches("[a-zA-Z0-9]+-[0-9]+"))
+			
+				
+		
+		t.setTermText(text);
+		System.out.println(text);
+
 		
 	}
 

@@ -64,6 +64,7 @@ public class ParserTest {
 	public void testParseInvalidFile(){
 		// Invalid file name (Test that the method will throw an exception)
 		try {
+			//d = Parser.parse("$%^.txt");
 			 d = Parser.parse("$%^thisFileNameWillNeverExist.txt");
 			fail("ParserException not thrown.");
 		} catch (ParserException e) {
