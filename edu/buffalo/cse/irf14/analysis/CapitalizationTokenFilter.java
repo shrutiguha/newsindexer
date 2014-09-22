@@ -111,7 +111,7 @@ while(!isEnd())
 				if(!isLower(nextToken))
 				{
 					System.out.println("T2 camel");
-					t.merge(text,nextToken);
+					t.merge(t1);
 					String a=t.getTermText();
 					System.out.println(a);
 					tstream.remove();

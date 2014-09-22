@@ -103,8 +103,6 @@ public class Parser {
 		            }
 				}
 				
-				System.out.println(content);
-				
 				d.setField(FieldNames.CONTENT, content);
 				
 				br.close();

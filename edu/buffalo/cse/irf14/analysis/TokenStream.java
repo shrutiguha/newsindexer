@@ -22,6 +22,7 @@ public class TokenStream implements Iterator<Token>{
 	{
 		this.tokenList = new ArrayList<Token>();
 		this.index = -1;
+		this.current = -1;
 	}
 	
 	public void add(Token token)
@@ -144,7 +145,7 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void saveCurrent() {
 		// TODO YOU MUST IMPLEMENT THIS
-		this.current=this.index;
+		this.current = this.index;
 	}
 	
 	/**
@@ -153,7 +154,7 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void setCurrent() {
 		// TODO YOU MUST IMPLEMENT THIS
-		this.index=this.current;
+		this.index = this.current;
 	}
 	
 	
@@ -166,7 +167,7 @@ public class TokenStream implements Iterator<Token>{
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
 		this.index = -1;
-		this.current=-1;
+		this.current = -1;
 		while(this.hasNext())
 		{
 			if(this.next() == null)

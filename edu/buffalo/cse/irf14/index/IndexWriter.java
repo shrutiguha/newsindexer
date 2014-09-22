@@ -47,74 +47,76 @@ public class IndexWriter {
 		TokenStream fileIdStream = new TokenStream();
 		TokenStream categoryStream = new TokenStream();
 		TokenStream termStream = new TokenStream();
+		TokenStream authorStream = new TokenStream();
+		TokenStream authorOrgStream = new TokenStream();
+		TokenStream placeStream = new TokenStream();
 				
 		try{
 			String fileids[] = d.getField(FieldNames.FILEID);
 			tokenizer.setFileId(fileids[0]);
-			for (String fileid : fileids) {
-				fileIdStream.append(tokenizer.consume(fileid));
+			if(fileids != null){
+				for (String fileid : fileids) {
+					fileIdStream.append(tokenizer.consume(fileid));
+				}
 			}
 			
 			String categories[] = d.getField(FieldNames.CATEGORY);
-			for (String category : categories) {
-				categoryStream.append(tokenizer.consume(category));
+			if(categories != null){
+				for (String category : categories) {
+					categoryStream.append(tokenizer.consume(category));
+				}
 			}
 			
 			String titles[] = d.getField(FieldNames.TITLE);
-			for (String title : titles) {
-				termStream.append(tokenizer.consume(title));
+			if(titles != null){
+				for (String title : titles) {
+					termStream.append(tokenizer.consume(title));
+				}
 			}
 			
 			String authors[] = d.getField(FieldNames.AUTHOR);
-			for (String author : authors) {
-				termStream.append(tokenizer.consume(author));
+			if(authors != null){
+				for (String author : authors) {
+					authorStream.append(tokenizer.consume(author));
+				}
 			}
 			
 			String authorOrgs[] = d.getField(FieldNames.AUTHORORG);
-			for (String authorOrg : authorOrgs) {
-				termStream.append(tokenizer.consume(authorOrg));
+			if(authorOrgs != null){
+				for (String authorOrg : authorOrgs) {
+					authorOrgStream.append(tokenizer.consume(authorOrg));
+				}
 			}
 			
 			String places[] = d.getField(FieldNames.PLACE);
-			for (String place : places) {
-				termStream.append(tokenizer.consume(place));
+			if(places != null){
+				for (String place : places) {
+					placeStream.append(tokenizer.consume(place));
+				}
 			}
 			
 			String newsDate[] = d.getField(FieldNames.NEWSDATE);
-			for (String newsdate : newsDate) {
-				termStream.append(tokenizer.consume(newsdate));
+			if(newsDate != null){
+				for (String newsdate : newsDate) {
+					termStream.append(tokenizer.consume(newsdate));
+				}
 			}
 			
 			String content[] = d.getField(FieldNames.CONTENT);
-			for (String con : content) {
-				termStream.append(tokenizer.consume(con));
+			if(content != null){
+				for (String con : content) {
+					termStream.append(tokenizer.consume(con));
+				}
 			}
 			
 			TokenFilterFactory factory = TokenFilterFactory.getInstance();
-
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.DATE, termStream);
 			
-			System.out.println("s");
+			writeCategory(factory, categoryStream);
 
-			System.out.println(termStream);
-
-			if(filter != null)
-			{
-				while (filter.increment()) {
-					
-				}
-				termStream = filter.getStream();
-
-				System.out.println(termStream);
-			}
-			
-			termStream.reset();
-			
-			
 		}
 		catch(Exception e)
 		{
-			
+			e.printStackTrace();
 		}
 		
 
@@ -136,4 +138,37 @@ public class IndexWriter {
 	public void setIndexDir(String indexDir) {
 		this.indexDir = indexDir;
 	}
+	
+	public void writeCategory(TokenFilterFactory factory, TokenStream categoryStream)
+	{
+		try{
+			
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, categoryStream);
+//			if(filter != null)
+//			{
+//				while (filter.increment()) {
+//					
+//				}
+//				categoryStream = filter.getStream();
+//			}
+			
+			categoryStream.reset();
+			
+			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, categoryStream);
+			if(filter != null)
+			{
+				while (filter.increment()) {
+					
+				}
+				categoryStream = filter.getStream();
+			}
+			
+			categoryStream.reset();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
+

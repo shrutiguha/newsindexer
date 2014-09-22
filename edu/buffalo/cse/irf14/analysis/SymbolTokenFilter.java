@@ -28,7 +28,7 @@ public class SymbolTokenFilter extends TokenFilter {
 		//Where i add the filter part
 		String text = t.getTermText();
 		
-		System.out.println(text);
+		//System.out.println(text);
 		
 		//Punctuation
 		text=text.replaceAll(". ", "");
@@ -63,7 +63,7 @@ public class SymbolTokenFilter extends TokenFilter {
 				
 		
 		t.setTermText(text);
-		System.out.println(text);
+		//System.out.println(text);
 
 		
 	}
