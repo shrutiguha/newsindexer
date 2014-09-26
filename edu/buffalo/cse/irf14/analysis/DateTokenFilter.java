@@ -29,22 +29,22 @@ public class DateTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 			
 		if(isDate(text))
 		{
 			text=getDate(text);
-				System.out.println("Date");
+				//System.out.println("Date");
 			if(tstream.hasNext())
 			{
 				Token t1=tstream.next();
 				String nextTerm=t1.getTermText();
 				nextTerm=nextTerm.toLowerCase();
-				System.out.println(nextTerm);
+				//System.out.println(nextTerm);
 				//if(isMonth())
 				{
 					//nextTerm=getMonth(nextTerm);
-					System.out.println("Month");
+					//System.out.println("Month");
 				
 					if(tstream.hasNext())
 					{
@@ -57,7 +57,7 @@ public class DateTokenFilter extends TokenFilter {
 							if(nextTerm1.length()==4)
 							{
 								tstream.saveCurrent();
-								System.out.println("Year");
+								//System.out.println("Year");
 								int year=Integer.parseInt(nextTerm1);
 						//		text=nextTerm1+mon+text;
 								tstream.remove();
@@ -91,7 +91,7 @@ public boolean isDate(String s)
 {
 	if(s.matches("[0-9]+[,]|[0-9]+|[,][0-9]+"))
 	{
-		System.out.println("Number");
+		//System.out.println("Number");
 		s=s.replaceAll("[,]", "");
 		int date=Integer.parseInt(s);
 		if(date>=1 && date<=31)
@@ -108,7 +108,7 @@ public String getDate(String s)
 	int date=Integer.parseInt(s);
 	if(date>=1 && date<=9)
 		s="0"+s;
-	System.out.println(s);
+	//System.out.println(s);
 	return s;
 }
 

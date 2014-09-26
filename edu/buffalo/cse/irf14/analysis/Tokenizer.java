@@ -13,7 +13,6 @@ public class Tokenizer {
 	 * Default constructor. Assumes tokens are whitespace delimited
 	 */
 	private String delimiter;
-	private String fileId;
 	
 	public Tokenizer() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
@@ -55,21 +54,11 @@ public class Tokenizer {
 		
 		for (String splitText : splitArray) {
 			token = new Token();
-			token.setTermText(splitText);
-			token.setFileId(this.fileId);
-
+			token.setTermText(splitText);			
 			tokenStream.add(token);
 
 		}
 		
 		return tokenStream;
-	}
-	
-	public String getFileId() {
-		return fileId;
-	}
-
-	public void setFileId(String fileId) {
-		this.fileId = fileId;
 	}
 }

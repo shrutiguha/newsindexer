@@ -56,8 +56,8 @@ public class SymbolTokenFilter extends TokenFilter {
 		
 		if(text.matches("[a-zA-Z]+-[a-zA-Z]+"))
 			text=text.replaceAll("-", " ");
-			else if(!text.matches("[^a-zA-Z0-9]*[a-zA-Z0-9]+[-][a-zA-Z0-9]+[^a-zA-Z0-9]*"))
-				text=text.replaceAll("-+", "");
+		else if(!text.matches("[^a-zA-Z0-9]*[a-zA-Z0-9]+[-][a-zA-Z0-9]+[^a-zA-Z0-9]*"))
+			text=text.replaceAll("-+", "");
 			//if(!text.matches("[a-zA-Z0-9]+-[0-9]+"))
 			
 				

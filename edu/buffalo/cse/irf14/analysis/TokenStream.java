@@ -22,7 +22,6 @@ public class TokenStream implements Iterator<Token>{
 	{
 		this.tokenList = new ArrayList<Token>();
 		this.index = -1;
-		this.current = -1;
 	}
 	
 	public void add(Token token)

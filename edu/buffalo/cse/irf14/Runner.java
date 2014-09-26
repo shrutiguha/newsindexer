@@ -8,6 +8,8 @@ import java.io.File;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.document.ParserException;
+import edu.buffalo.cse.irf14.index.IndexReader;
+import edu.buffalo.cse.irf14.index.IndexType;
 import edu.buffalo.cse.irf14.index.IndexWriter;
 import edu.buffalo.cse.irf14.index.IndexerException;
 
@@ -68,6 +70,9 @@ public class Runner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
+		System.out.println("Key terms: "+reader.getTotalKeyTerms());
 	}
 
 }

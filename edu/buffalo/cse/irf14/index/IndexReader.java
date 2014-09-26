@@ -3,15 +3,22 @@
  */
 package edu.buffalo.cse.irf14.index;
 
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author nikhillo
  * Class that emulates reading data back from a written index
  */
 public class IndexReader {
+	
+	private String indexDir;
+	private IndexType type;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory from which the index is to be read.
@@ -21,6 +28,8 @@ public class IndexReader {
 	 */
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
+		this.indexDir = indexDir;
+		this.type = type;
 	}
 	
 	/**
@@ -28,8 +37,46 @@ public class IndexReader {
 	 * index. A postings list is always created against the "key" dictionary
 	 * @return The total number of terms
 	 */
+	@SuppressWarnings({ "unchecked", "resource" })
 	public int getTotalKeyTerms() {
 		//TODO : YOU MUST IMPLEMENT THIS
+		File dir = new File(this.indexDir);
+		Map<Integer, String> dictionary;
+		ObjectInputStream ois;
+		try{
+			if(dir.exists())
+			{
+				switch(this.type)
+				{
+					case TERM: 
+						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
+						dictionary = (TreeMap<Integer, String>) ois.readObject();
+						ois.close();
+						return dictionary.size();
+					case AUTHOR: 
+						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Dictionary.ser"));
+						dictionary = (TreeMap<Integer, String>) ois.readObject();
+						ois.close();
+						return dictionary.size();
+					case CATEGORY: 
+						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Dictionary.ser"));
+						dictionary = (TreeMap<Integer, String>) ois.readObject();
+						ois.close();
+						return dictionary.size();
+					case PLACE: 
+						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Dictionary.ser"));
+						dictionary = (TreeMap<Integer, String>) ois.readObject();
+						ois.close();
+						return dictionary.size();
+					default: return -1;
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		return -1;
 	}
 	
@@ -38,8 +85,25 @@ public class IndexReader {
 	 * index. A postings list is always created with the "value" dictionary
 	 * @return The total number of terms
 	 */
+	@SuppressWarnings("unchecked")
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
+		try{
+			File dir = new File(this.indexDir);
+			Map<Integer, String> dictionary;
+			if(dir.exists())
+			{
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+				dictionary = (TreeMap<Integer, String>) ois.readObject();
+				ois.close();
+				return dictionary.size();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		return -1;
 	}
 	
@@ -60,9 +124,10 @@ public class IndexReader {
 	 * Method to get the top k terms from the index in terms of the total number
 	 * of occurrences.
 	 * @param k : The number of terms to fetch
-	 * @return : An ordered list of results. Must be <=k fr valid k values
+	 * @return : An ordered list of results. Must be <=k for valid k values
 	 * null for invalid k values
 	 */
+	@SuppressWarnings({ "resource", "unchecked" })
 	public List<String> getTopK(int k) {
 		//TODO YOU MUST IMPLEMENT THIS
 		return null;

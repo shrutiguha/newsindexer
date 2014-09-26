@@ -28,7 +28,7 @@ public class StopWordTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 		int i=0;
 		String words[]={"of","is","are","not","why","who","where","will","us","me","you","I","am","a","and","all","but","by","did","do","for","he","she","in","no","on","off","our","only","out","so","the","this","to","up","was","we","were"};
 		int len=words.length;
@@ -38,13 +38,13 @@ public class StopWordTokenFilter extends TokenFilter {
 		for(i=0;i<len;i++)
 			if(text.equalsIgnoreCase(words[i]))
 		{
-			System.out.println(words[i]);
+			//System.out.println(words[i]);
 			tstream.remove();
-			System.out.println("Term Removed");
+			//System.out.println("Term Removed");
 		}
 		
 		
-		System.out.println(text);
+		//System.out.println(text);
         t.setTermText(text);
 	}
 

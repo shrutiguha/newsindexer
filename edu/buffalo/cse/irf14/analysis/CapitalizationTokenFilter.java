@@ -27,16 +27,16 @@ public class CapitalizationTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 		int flag=0;
 		boolean s=false;
-		String temp=null;
+		tstream.saveCurrent();
 		if(!tstream.hasPrevious())
 		{
-			System.out.println("First word");
+			//System.out.println("First word");
 			if(isUpper(text))
 			{
-				System.out.println("It is uppercase");
+				//System.out.println("It is uppercase");
 				tstream.saveCurrent();
 			while(!isEnd())
 			{ 
@@ -50,38 +50,21 @@ public class CapitalizationTokenFilter extends TokenFilter {
 			if(flag==1)
 			{
 				tstream.setCurrent();
-				System.out.println("The whole sentence is not uppercase");
-//
-//				text=text.toLowerCase();
-//				t.setTermText(text);
-//				System.out.println(text);
-//while(!isEnd())
-//{
-//
-//		Token t1=tstream.next();
-//		text=t1.getTermText();
-//				System.out.println(text);
-//
-//				
-//					text=text.toLowerCase();
-//					t1.setTermText(text);
-//					
-			
-//}
+				//System.out.println("The whole sentence is not uppercase");
 			}
 			else
 			{
-				System.out.println("Whole sentence is in uppercase");
+				//System.out.println("Whole sentence is in uppercase");
 				tstream.setCurrent();
 				text=text.toLowerCase();
 				t.setTermText(text);
-				System.out.println(text);
+				//System.out.println(text);
 while(!isEnd())
 {
 
 		Token t1=tstream.next();
 		text=t1.getTermText();
-				System.out.println(text);
+				//System.out.println(text);
 
 				
 					text=text.toLowerCase();
@@ -102,7 +85,7 @@ while(!isEnd())
 			//System.out.println("Not the first word");
 			if(!isLower(text))
 			{
-				System.out.println("T1 camel");
+				//System.out.println("T1 camel");
 				if(tstream.hasNext())
 				{
 				Token t1=tstream.next();
@@ -110,10 +93,10 @@ while(!isEnd())
 				
 				if(!isLower(nextToken))
 				{
-					System.out.println("T2 camel");
+					//System.out.println("T2 camel");
 					t.merge(t1);
-					String a=t.getTermText();
-					System.out.println(a);
+					//String a=t.getTermText();
+					//System.out.println(a);
 					tstream.remove();
 				}
 
@@ -123,7 +106,7 @@ while(!isEnd())
 
 				
 		}
-		System.out.println(text);
+		//System.out.println(text);
 
 		
 	}
@@ -154,7 +137,7 @@ public boolean checkNextToken()
 			return true;
 			
 	}
-	System.out.println("Nextword Not Uppercase");
+	//System.out.println("Nextword Not Uppercase");
 	return false;
 }
 public boolean isEnd()

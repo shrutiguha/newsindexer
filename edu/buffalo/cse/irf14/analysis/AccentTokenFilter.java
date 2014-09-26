@@ -31,9 +31,9 @@ public class AccentTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-          System.out.println(text);
+        //System.out.println(text);
 		   text=text == null ? null: Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-		System.out.println(text);
+		//System.out.println(text);
 		
 		
         t.setTermText(text);

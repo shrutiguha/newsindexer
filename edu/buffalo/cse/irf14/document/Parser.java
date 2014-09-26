@@ -4,6 +4,7 @@
 package edu.buffalo.cse.irf14.document;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -38,8 +39,7 @@ public class Parser {
 				throw new ParserException();
 			else
 			{
-				filename = filename.replace('\\', '/');
-				String fileArray[] = filename.split("/");
+				String fileArray[] = filename.split(Pattern.quote(File.separator));
 				int fileArrayLength = fileArray.length;
 				if(fileArrayLength > 0)
 				{
@@ -99,7 +99,7 @@ public class Parser {
 		            }
 		            else if(placeDate)
 		            {
-		            	content += line;
+		            	content += " " + line;
 		            }
 				}
 				
