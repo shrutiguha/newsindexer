@@ -72,7 +72,7 @@ public class Runner {
 		}
 		
 		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
-		System.out.println("Key terms: "+reader.getTotalKeyTerms());
+		System.out.println("Key terms: "+reader.getTopK(5));
 	}
 
 }

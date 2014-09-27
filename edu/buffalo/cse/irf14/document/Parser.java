@@ -81,7 +81,7 @@ public class Parser {
 		            	String tempArray[] = line.split("-");
 		            	int tempArrayLength = tempArray.length;
 		            	if(tempArrayLength > 0)
-		            		content += tempArray[tempArray.length-1];
+		            		content += tempArray[tempArray.length-1].trim();
 		            	if(tempArrayLength > 1)
 		            	{
 		            		String placeDateArray[] = tempArray[0].split(",");
@@ -99,7 +99,7 @@ public class Parser {
 		            }
 		            else if(placeDate)
 		            {
-		            	content += " " + line;
+		            	content += " " + line.trim();
 		            }
 				}
 				

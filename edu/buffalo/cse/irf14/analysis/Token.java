@@ -17,6 +17,7 @@ public class Token {
 	//The char array backing termText
 	private char[] termBuffer;
 	private int fileId;
+	private int id;
 	
 	/**
 	 * Method to set the termText to given text.
@@ -101,6 +102,14 @@ public class Token {
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
 		return this.termText;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 }

@@ -13,12 +13,12 @@ import java.util.TreeMap;
 
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.AuthorAnalyzer;
-import edu.buffalo.cse.irf14.analysis.AuthorData;
 import edu.buffalo.cse.irf14.analysis.CategoryAnalyzer;
 import edu.buffalo.cse.irf14.analysis.ContentAnalyzer;
 import edu.buffalo.cse.irf14.analysis.NewsDateAnalyzer;
 import edu.buffalo.cse.irf14.analysis.PlaceAnalyzer;
 import edu.buffalo.cse.irf14.analysis.TitleAnalyzer;
+import edu.buffalo.cse.irf14.analysis.Token;
 import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
@@ -43,8 +43,8 @@ public class IndexWriter {
 	private Map<Integer, List<Integer>> categoryIndex;
 	private Map<String, Integer> placeDictionary;
 	private Map<Integer, List<Integer>> placeIndex;
-	private Map<String, AuthorData> authorDictionary;
-	private Map<Integer, List<Integer>> authorIndex;
+	private Map<String, String> authorDictionary;
+	private Map<String, List<Integer>> authorIndex;
 	//This parameter contains the address of the folder where everything needs to be stored.
 	/**
 	 * Default constructor
@@ -61,8 +61,8 @@ public class IndexWriter {
 		this.categoryIndex = new TreeMap<Integer, List<Integer>>();
 		this.placeDictionary = new TreeMap<String, Integer>();
 		this.placeIndex = new TreeMap<Integer, List<Integer>>();
-		this.authorDictionary = new TreeMap<String, AuthorData>();
-		this.authorIndex = new TreeMap<Integer, List<Integer>>();
+		this.authorDictionary = new TreeMap<String, String>();
+		this.authorIndex = new TreeMap<String, List<Integer>>();
 		this.count = 1;
 	}
 	
@@ -213,7 +213,7 @@ public class IndexWriter {
 			addToAuthorIndex(analyzerFactory, tokenFactory, authorStream);
 			
 			addToTermDictionary(analyzerFactory, termStream);
-			contentStream.reset();
+			termStream.reset();
 			addToTermIndex(analyzerFactory, tokenFactory, termStream);
 
 		}
@@ -335,7 +335,7 @@ public class IndexWriter {
 				dir.mkdir();
 				
 			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Category Index" + this.count + ".ser")
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser")
 			);
 			oos.writeObject(this.categoryIndex);
 			oos.flush();
@@ -421,7 +421,7 @@ public class IndexWriter {
 				dir.mkdir();
 				
 			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Place Index" + this.count + ".ser")
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser")
 			);
 			oos.writeObject(this.placeIndex);
 			oos.flush();
@@ -440,15 +440,13 @@ public class IndexWriter {
 		try{		
 			while(authorStream.hasNext())
 			{
-				String text = authorStream.next().toString();
-				if(!this.authorDictionary.containsKey(text)){
-					AuthorData ad = new AuthorData();
-					ad.setAuthorId(this.authorDictionary.size()+1);
-					ad.setAuthorOrg(this.currentAuthorOrg);
-					this.authorDictionary.put(text, ad);
+				Token token = authorStream.next();
+				String text = token.toString();
+				if(!this.authorDictionary.containsValue(text))
+				{
+					this.authorDictionary.put(text, this.currentAuthorOrg);
 				}
-			}
-			
+			}			
 		}
 		catch(Exception e)
 		{
@@ -483,16 +481,17 @@ public class IndexWriter {
 		try{
 			while(authorStream.hasNext())
 			{
-				int authorId = this.authorDictionary.get(authorStream.next().toString()).getAuthorId();
-				if(this.authorIndex.containsKey(authorId)){
-					List<Integer> tempList = this.authorIndex.get(authorId);
+				Token token = authorStream.next();
+				String authorName = token.toString();
+				if(this.authorIndex.containsKey(authorName)){
+					List<Integer> tempList = this.authorIndex.get(authorName);
 					tempList.add(this.currentFileId);
-					this.authorIndex.put(authorId, tempList);
+					this.authorIndex.put(authorName, tempList);
 				}
 				else{
 					List<Integer> tempList = new ArrayList<Integer>();
 					tempList.add(this.currentFileId);
-					this.authorIndex.put(authorId, tempList);
+					this.authorIndex.put(authorName, tempList);
 				}
 			}
 			
@@ -511,7 +510,7 @@ public class IndexWriter {
 				dir.mkdir();
 				
 			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Author Index" + this.count + ".ser")
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Author Index.ser")
 			);
 			oos.writeObject(this.authorIndex);
 			oos.flush();
@@ -597,7 +596,7 @@ public class IndexWriter {
 				dir.mkdir();
 				
 			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Term Index" + this.count + ".ser")
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser")
 			);
 			oos.writeObject(this.termIndex);
 			oos.flush();
@@ -640,4 +639,3 @@ public class IndexWriter {
 	}
 	
 }
-

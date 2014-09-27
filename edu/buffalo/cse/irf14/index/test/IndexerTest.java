@@ -112,7 +112,7 @@ public class IndexerTest {
 		try {
 			TokenStream stream = tknizer.consume(string);
 			Analyzer analyzer = fact.getAnalyzerForField(FieldNames.CONTENT, stream);
-			
+			stream = analyzer.getStream(); 
 			while (analyzer.increment()) {
 				
 			}
