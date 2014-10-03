@@ -3,7 +3,6 @@ package edu.buffalo.cse.irf14.analysis;
 public class PlaceAnalyzer implements Analyzer{
 
 	TokenStream tstream;
-	TokenFilterFactory factory;
 
 	public PlaceAnalyzer(TokenStream tstream) {
 		// TODO Auto-generated constructor stub
@@ -13,12 +12,8 @@ public class PlaceAnalyzer implements Analyzer{
 	@Override
 	public boolean increment() throws TokenizerException {
 		// TODO Auto-generated method stub
+		analyze();
 		return false;
-	}
-	
-	public void setTokenFilterFactory(TokenFilterFactory factory)
-	{
-		this.factory = factory;
 	}
 
 	@Override
@@ -29,7 +24,8 @@ public class PlaceAnalyzer implements Analyzer{
 	
 	public void analyze(){
 		try{	
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION2, this.tstream);
 			if(filter != null)
 			{
 				while (filter.increment()) {
@@ -40,7 +36,7 @@ public class PlaceAnalyzer implements Analyzer{
 			
 			this.tstream.reset();
 			
-			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, this.tstream);
+			filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
 			if(filter != null)
 			{
 				while (filter.increment()) {
@@ -49,7 +45,15 @@ public class PlaceAnalyzer implements Analyzer{
 				this.tstream = filter.getStream();
 			}
 			this.tstream.reset();
-			
+			filter = factory.getFilterByType(TokenFilterType.ACCENT, this.tstream);
+			if(filter != null)
+			{
+				while (filter.increment()) {
+					
+				}
+				this.tstream = filter.getStream();
+			}
+			this.tstream.reset();
 			filter = factory.getFilterByType(TokenFilterType.SPECIALCHARS, this.tstream);
 			if(filter != null)
 			{

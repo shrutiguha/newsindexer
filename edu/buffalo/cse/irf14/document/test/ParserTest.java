@@ -17,7 +17,7 @@ public class ParserTest {
 	 * If you are going to be using these tests locally and your corpus data is not in your project
 	 * directory then feel free to change this. */
 	private static final String BASE_USER_DIR = 
-			System.getProperty("user.dir") + File.separatorChar + "training" ;
+			System.getProperty("user.dir") + File.separatorChar + "src" + File.separatorChar + "training" ;
 	
 	private static final String[] titles = {"COMPUTER TERMINAL SYSTEMS <CPML> COMPLETES SALE",
 		"DUTCH PLANNING AGENCY FORECASTS LOWER GROWTH", "WESTMIN TO RAISE MYRA FALLS CAPACITY BY 33 PCT",

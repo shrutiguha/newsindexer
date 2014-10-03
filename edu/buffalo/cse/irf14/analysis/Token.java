@@ -18,6 +18,9 @@ public class Token {
 	private char[] termBuffer;
 	private int fileId;
 	private int id;
+
+	public boolean isComma=false;
+	public boolean isDot=false;
 	
 	/**
 	 * Method to set the termText to given text.

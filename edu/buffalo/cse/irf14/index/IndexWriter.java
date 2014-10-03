@@ -4,11 +4,15 @@
 package edu.buffalo.cse.irf14.index;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
@@ -19,7 +23,6 @@ import edu.buffalo.cse.irf14.analysis.NewsDateAnalyzer;
 import edu.buffalo.cse.irf14.analysis.PlaceAnalyzer;
 import edu.buffalo.cse.irf14.analysis.TitleAnalyzer;
 import edu.buffalo.cse.irf14.analysis.Token;
-import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
 import edu.buffalo.cse.irf14.analysis.TokenizerException;
@@ -54,6 +57,26 @@ public class IndexWriter {
 		//TODO : YOU MUST IMPLEMENT THIS
 		//If there is a parameter passed, assign it to the variable.
 		this.indexDir = indexDir;
+		File dir = new File(indexDir);
+		if(!dir.exists())
+			dir.mkdir();
+		else{
+			String contents[] = dir.list();
+			File folder;
+			for(String content : contents)
+			{
+				folder = new File(indexDir + File.separator + content);
+				if(folder.isDirectory())
+				{
+					String files[] = folder.list();
+					for(String file : files)
+					{
+						new File(folder.getAbsolutePath() + File.separator + file).delete();
+					}
+				}
+				folder.delete();
+			}
+		}
 		this.documentDictionary = new TreeMap<Integer, String>();
 		this.termDictionary = new TreeMap<String, Integer>();
 		this.termIndex = new TreeMap<Integer, List<Integer>>();
@@ -157,75 +180,68 @@ public class IndexWriter {
 			}
 			
 			AnalyzerFactory analyzerFactory = AnalyzerFactory.getInstance();
-			TokenFilterFactory tokenFactory = TokenFilterFactory.getInstance();
 			
 			CategoryAnalyzer categoryAnalyzer = (CategoryAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.CATEGORY, categoryStream);
-			categoryAnalyzer.setTokenFilterFactory(tokenFactory);
-			categoryAnalyzer.analyze();
+			categoryAnalyzer.increment();
 			categoryStream = categoryAnalyzer.getStream();
 			
 			TitleAnalyzer titleAnalyzer = (TitleAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.TITLE, titleStream);
-			titleAnalyzer.setTokenFilterFactory(tokenFactory);
-			titleAnalyzer.analyze();			
+			titleAnalyzer.increment();			
 			titleStream = titleAnalyzer.getStream();
 			
 			AuthorAnalyzer authorAnalyzer = (AuthorAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.AUTHOR, authorStream);
-			authorAnalyzer.setTokenFilterFactory(tokenFactory);
-			authorAnalyzer.analyze();
+			authorAnalyzer.increment();
 			authorStream = authorAnalyzer.getStream();
 			
 			/*AuthorOrgAnalyzer authorOrgAnalyzer = (AuthorOrgAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.AUTHORORG, authorOrgStream);
 			authorOrgAnalyzer.setTokenFilterFactory(tokenFactory);
-			authorOrgAnalyzer.analyze();
+			authorOrgAnalyzer.increment();
 			authorOrgStream = authorOrgAnalyzer.getStream();*/
 						
 			PlaceAnalyzer placeAnalyzer = (PlaceAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.PLACE, placeStream);
-			placeAnalyzer.setTokenFilterFactory(tokenFactory);
-			placeAnalyzer.analyze();
+			placeAnalyzer.increment();
 			placeStream = placeAnalyzer.getStream();
 			
 			NewsDateAnalyzer newsDateAnalyzer = (NewsDateAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.NEWSDATE, dateStream);
-			newsDateAnalyzer.setTokenFilterFactory(tokenFactory);
-			newsDateAnalyzer.analyze();
+			newsDateAnalyzer.increment();
 			dateStream = newsDateAnalyzer.getStream();
 			
 			ContentAnalyzer contentAnalyzer = (ContentAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.CONTENT, contentStream);
-			contentAnalyzer.setTokenFilterFactory(tokenFactory);
-			contentAnalyzer.analyze();
+			contentAnalyzer.increment();
 			contentStream = contentAnalyzer.getStream();
 			
 			termStream.append(titleStream);
 			termStream.append(dateStream);
 			termStream.append(contentStream);
 			
-			addToDocumentDictionary(analyzerFactory, fileIdStream);
+			addToDocumentDictionary(fileIdStream);
 			
-			addToCategoryDictionary(analyzerFactory, categoryStream);
+			addToCategoryDictionary(categoryStream);
 			categoryStream.reset();
-			addToCategoryIndex(analyzerFactory, tokenFactory, categoryStream);
+			addToCategoryIndex(categoryStream);
 			
-			addToPlaceDictionary(analyzerFactory, placeStream);
+			addToPlaceDictionary(placeStream);
 			placeStream.reset();
-			addToPlaceIndex(analyzerFactory, tokenFactory, placeStream);
+			addToPlaceIndex(placeStream);
 			
-			addToAuthorDictionary(analyzerFactory, authorStream);
+			addToAuthorDictionary(authorStream);
 			authorStream.reset();
-			addToAuthorIndex(analyzerFactory, tokenFactory, authorStream);
+			addToAuthorIndex(authorStream);
 			
-			addToTermDictionary(analyzerFactory, termStream);
+			addToTermDictionary(termStream);
 			termStream.reset();
-			addToTermIndex(analyzerFactory, tokenFactory, termStream);
+			addToTermIndex(termStream);
 
 		}
 		catch(Exception e)
 		{
-			throw new IndexerException();
+			e.printStackTrace();
 		}
 		
 
 	}
 	
-	private void addToDocumentDictionary(AnalyzerFactory analyzerFactory, TokenStream fileIdStream)
+	private void addToDocumentDictionary(TokenStream fileIdStream)
 	{
 		try{			
 			while(fileIdStream.hasNext())
@@ -254,7 +270,7 @@ public class IndexWriter {
 			oos.writeObject(this.documentDictionary);
 			oos.flush();
 			oos.close();
-			System.out.println(this.documentDictionary);
+			//System.out.println(this.documentDictionary);
 			this.documentDictionary.clear();
 		}
 		catch(Exception e)
@@ -263,7 +279,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToCategoryDictionary(AnalyzerFactory analyzerFactory, TokenStream categoryStream)
+	private void addToCategoryDictionary(TokenStream categoryStream)
 	{
 		try{			
 			while(categoryStream.hasNext())
@@ -293,7 +309,7 @@ public class IndexWriter {
 			oos.writeObject(this.categoryDictionary);
 			oos.flush();
 			oos.close();
-			System.out.println(this.categoryDictionary);
+			//System.out.println(this.categoryDictionary);
 			this.categoryDictionary.clear();
 		}
 		catch(Exception e)
@@ -302,7 +318,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToCategoryIndex(AnalyzerFactory analyzerFactory, TokenFilterFactory tokenFactory, TokenStream categoryStream)
+	private void addToCategoryIndex(TokenStream categoryStream)
 	{
 		try{
 			while(categoryStream.hasNext())
@@ -340,7 +356,7 @@ public class IndexWriter {
 			oos.writeObject(this.categoryIndex);
 			oos.flush();
 			oos.close();
-			System.out.println(this.categoryIndex);
+			//System.out.println(this.categoryIndex);
 			this.categoryIndex.clear();
 		}
 		catch(Exception e)
@@ -349,7 +365,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToPlaceDictionary(AnalyzerFactory analyzerFactory, TokenStream placeStream)
+	private void addToPlaceDictionary(TokenStream placeStream)
 	{
 		try{			
 			while(placeStream.hasNext())
@@ -379,7 +395,7 @@ public class IndexWriter {
 			oos.writeObject(this.placeDictionary);
 			oos.flush();
 			oos.close();
-			System.out.println(this.placeDictionary);
+			//System.out.println(this.placeDictionary);
 			this.placeDictionary.clear();
 		}
 		catch(Exception e)
@@ -388,7 +404,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToPlaceIndex(AnalyzerFactory analyzerFactory, TokenFilterFactory tokenFactory, TokenStream placeStream)
+	private void addToPlaceIndex(TokenStream placeStream)
 	{
 		try{
 			while(placeStream.hasNext())
@@ -426,7 +442,7 @@ public class IndexWriter {
 			oos.writeObject(this.placeIndex);
 			oos.flush();
 			oos.close();
-			System.out.println(this.placeIndex);
+			//System.out.println(this.placeIndex);
 			this.placeIndex.clear();
 		}
 		catch(Exception e)
@@ -435,7 +451,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToAuthorDictionary(AnalyzerFactory analyzerFactory, TokenStream authorStream)
+	private void addToAuthorDictionary(TokenStream authorStream)
 	{
 		try{		
 			while(authorStream.hasNext())
@@ -467,7 +483,7 @@ public class IndexWriter {
 			oos.writeObject(this.authorDictionary);
 			oos.flush();
 			oos.close();
-			System.out.println(this.authorDictionary);
+			//System.out.println(this.authorDictionary);
 			this.authorDictionary.clear();
 		}
 		catch(Exception e)
@@ -476,7 +492,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToAuthorIndex(AnalyzerFactory analyzerFactory, TokenFilterFactory tokenFactory, TokenStream authorStream)
+	private void addToAuthorIndex(TokenStream authorStream)
 	{
 		try{
 			while(authorStream.hasNext())
@@ -515,7 +531,7 @@ public class IndexWriter {
 			oos.writeObject(this.authorIndex);
 			oos.flush();
 			oos.close();
-			System.out.println(this.authorIndex);
+			//System.out.println(this.authorIndex);
 			this.authorIndex.clear();
 		}
 		catch(Exception e)
@@ -524,7 +540,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToTermDictionary(AnalyzerFactory analyzerFactory, TokenStream termStream)
+	private void addToTermDictionary(TokenStream termStream)
 	{
 		try{			
 			while(termStream.hasNext())
@@ -563,7 +579,7 @@ public class IndexWriter {
 		}
 	}
 	
-	private void addToTermIndex(AnalyzerFactory analyzerFactory, TokenFilterFactory tokenFactory, TokenStream termStream)
+	private void addToTermIndex(TokenStream termStream)
 	{
 		try{
 			while(termStream.hasNext())
@@ -581,6 +597,9 @@ public class IndexWriter {
 				}
 			}
 			
+			if(this.currentFileId%100 == 0)
+				writeToTermIndex();
+			
 		}
 		catch(Exception e)
 		{
@@ -596,12 +615,12 @@ public class IndexWriter {
 				dir.mkdir();
 				
 			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser")
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator + "Term Index" + (this.count++) + ".ser")
 			);
 			oos.writeObject(this.termIndex);
 			oos.flush();
 			oos.close();
-			System.out.println(this.termIndex);
+			System.out.println("Term index"+count+": "+this.termIndex);
 			this.termIndex.clear();
 		}
 		catch(Exception e)
@@ -618,24 +637,79 @@ public class IndexWriter {
 	public void close() throws IndexerException {
 		//TODO
 		try{
-			write();
+			writeToCategoryIndex();
+			writeToPlaceIndex();
+			writeToAuthorIndex();
+			writeToTermIndex();
 			writeToDocumentDictionary();
 			writeToCategoryDictionary();
 			writeToPlaceDictionary();
 			writeToAuthorDictionary();
 			writeToTermDictionary();
+			merge();
 		}
 		catch(Exception e){
-			throw new IndexerException();
+			e.printStackTrace();
 		}
 	}
 	
-	public void write(){
-		writeToCategoryIndex();
-		writeToPlaceIndex();
-		writeToAuthorIndex();
-		writeToTermIndex();
-		this.count++;
+	@SuppressWarnings("unchecked")
+	public void merge()
+	{
+		//recursively merge
+		try{
+			File ipDirectory = new File(this.indexDir + File.separator + "term");
+			String[] files = ipDirectory.list();
+			Map<Integer, List<Integer>> mergedMap = new TreeMap<Integer, List<Integer>>();
+			ObjectInputStream ois;
+			
+			for(String file : files)
+			{
+				if(file.equals("Term Index.ser"))
+					continue;
+				else{
+					ois = new ObjectInputStream(new FileInputStream(ipDirectory.getAbsolutePath() + File.separator + file));				
+					mergedMap = mergeFiles(mergedMap, (TreeMap<Integer, List<Integer>>) ois.readObject());
+					ois.close();
+					//System.out.println(mergedMap.size());
+				}
+			}
+			
+			File dir = new File(this.indexDir+ File.separator+ "term");
+			if(!dir.exists())
+				dir.mkdir();
+				
+			ObjectOutputStream oos = new ObjectOutputStream(
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator + "Term Index.ser")
+			);
+			oos.writeObject(mergedMap);
+			oos.flush();
+			oos.close();
+			
+			//System.out.println("Merge:"+mergedMap);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public Map<Integer, List<Integer>> mergeFiles(Map<Integer, List<Integer>> m1, Map<Integer, List<Integer>> m2)
+	{		
+		Map<Integer, List<Integer>> mergedMap = new TreeMap<Integer, List<Integer>>();
+		Iterator<Entry<Integer, List<Integer>>> i1 = m1.entrySet().iterator();
+		while(i1.hasNext()){
+			Entry<Integer, List<Integer>> entry = i1.next();
+			mergedMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		Iterator<Entry<Integer, List<Integer>>> i2 = m2.entrySet().iterator();
+		while(i2.hasNext()){
+			Entry<Integer, List<Integer>> entry = i2.next();
+			mergedMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		return mergedMap;
 	}
 	
 }

@@ -143,6 +143,7 @@ public class IndexerTest {
 			topK = reader.getTopK(i + 1);
 			assertNotNull(topK);
 			assertEquals(i + 1, topK.size(), 0);
+			//System.out.println(topK);
 			
 			for (int j = 0; j <=i; j++) {
 				assertEquals(vals[j], topK.get(j));
@@ -165,6 +166,8 @@ public class IndexerTest {
 		
 		for (int i = 0; i <len; i++) {
 			queryTerms[i] = getAnalyzedTerm(queryTerms[i]);
+			System.out.println("Query:"+queryTerms[i]);
+			
 		}
 		
 		/*

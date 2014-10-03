@@ -121,56 +121,58 @@ public class IndexReader {
 	 */
 	@SuppressWarnings({ "unchecked", "resource" })
 	public Map<String, Integer> getPostings(String term) {
-		try
+		if(term != null)
 		{
-			File dir = new File(this.indexDir);
-			Map<String, Integer> map;
-			if(dir.exists())
+			try
 			{
-				ObjectInputStream ois;
-				switch(this.type)
+				File dir = new File(this.indexDir);
+				Map<String, Integer> map;
+				if(dir.exists())
 				{
-					case TERM: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
-						Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "term");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-						map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary);
-						ois.close();
-						return map;
-					case AUTHOR:
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Dictionary.ser"));
-						Map<String, String> authorDictionary = (TreeMap<String, String>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "author");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Index.ser"));
-						map = authorPostings((TreeMap<String, List<Integer>>) ois.readObject(), authorDictionary);
-						ois.close();
-						return map;
-					case CATEGORY: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Dictionary.ser"));
-						dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "category");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
-						map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary);
-						ois.close();
-						return map;
-					case PLACE: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Dictionary.ser"));
-						dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "place");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
-						map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary);
-						ois.close();
-						return map;
-					default: return null;
+					ObjectInputStream ois;
+					switch(this.type)
+					{
+						case TERM: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
+							Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "term");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
+							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							ois.close();
+							return map;
+						case AUTHOR:
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Dictionary.ser"));
+							Map<String, String> authorDictionary = (TreeMap<String, String>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "author");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Index.ser"));
+							map = authorPostings((TreeMap<String, List<Integer>>) ois.readObject(), authorDictionary, term);
+							ois.close();
+							return map;
+						case CATEGORY: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Dictionary.ser"));
+							dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "category");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
+							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							ois.close();
+							return map;
+						case PLACE: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Dictionary.ser"));
+							dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "place");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
+							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							ois.close();
+							return map;
+						default: return null;
+					}
 				}
 			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
 		return null;
 	}
 	
@@ -184,54 +186,57 @@ public class IndexReader {
 	@SuppressWarnings({ "resource", "unchecked" })
 	public List<String> getTopK(int k) {
 		//TODO YOU MUST IMPLEMENT THIS
-		try
+		if(k > 0)
 		{
-			File dir = new File(this.indexDir);
-			List<String> list;
-			if(dir.exists())
+			try
 			{
-				ObjectInputStream ois;
-				switch(this.type)
+				File dir = new File(this.indexDir);
+				List<String> list;
+				if(dir.exists())
 				{
-					case TERM: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
-						Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "term");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-						list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
-						ois.close();
-						return list;
-					case AUTHOR:
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Dictionary.ser"));
-						Map<String, String> authorDictionary = (TreeMap<String, String>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "author");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Index.ser"));
-						list = sortAuthor((TreeMap<String, List<Integer>>) ois.readObject(), authorDictionary, k);
-						ois.close();
-						return list;
-					case CATEGORY: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Dictionary.ser"));
-						dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "category");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
-						list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
-						ois.close();
-						return list;
-					case PLACE: 
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Dictionary.ser"));
-						dictionary = (TreeMap<String, Integer>) ois.readObject();
-						dir = new File(this.indexDir+ File.separator+ "place");
-						ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
-						list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
-						ois.close();
-						return list;
-					default: return null;
+					ObjectInputStream ois;
+					switch(this.type)
+					{
+						case TERM: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
+							Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "term");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
+							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							ois.close();
+							return list;
+						case AUTHOR:
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Dictionary.ser"));
+							Map<String, String> authorDictionary = (TreeMap<String, String>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "author");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Author Index.ser"));
+							list = sortAuthor((TreeMap<String, List<Integer>>) ois.readObject(), authorDictionary, k);
+							ois.close();
+							return list;
+						case CATEGORY: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Dictionary.ser"));
+							dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "category");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
+							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							ois.close();
+							return list;
+						case PLACE: 
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Dictionary.ser"));
+							dictionary = (TreeMap<String, Integer>) ois.readObject();
+							dir = new File(this.indexDir+ File.separator+ "place");
+							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
+							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							ois.close();
+							return list;
+						default: return null;
+					}
 				}
 			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		
 		return null;
@@ -247,30 +252,92 @@ public class IndexReader {
 	 * if the given term list returns no results
 	 * BONUS ONLY
 	 */
+	@SuppressWarnings({ "unchecked", "resource" })
 	public Map<String, Integer> query(String...terms) {
 		//TODO : BONUS ONLY
+		//get postings list for each term->find overlap->find sum of occurrences of terms
+		try{
+			File dir = new File(this.indexDir);
+			Map<String, List<Integer>> postings = new TreeMap<String, List<Integer>>();
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
+			Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
+			dir = new File(this.indexDir+ File.separator+ "term");
+			ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
+			Map<Integer, List<Integer>> index = (Map<Integer, List<Integer>>) ois.readObject();
+			Map<Integer, Integer> uniqueFileList = new HashMap<Integer, Integer>();
+			for(String term : terms){
+				List<Integer> tempPostings = index.get(dictionary.get(term)); 
+				postings.put(term, tempPostings);
+				Iterator<Integer> i = tempPostings.iterator();
+				while(i.hasNext())
+				{
+					uniqueFileList.put((Integer) i.next(), 5);
+				}
+			}
+			
+			Iterator<Entry<Integer, Integer>> fileIterator = uniqueFileList.entrySet().iterator();
+			Map<Integer, Integer> fileList = new HashMap<Integer, Integer>();
+			while(fileIterator.hasNext())
+			{
+				Integer fileId = fileIterator.next().getKey();
+				boolean flag = true;
+				Integer count = 0;
+				Iterator<Entry<String, List<Integer>>> postingsIterator = postings.entrySet().iterator();
+				while(postingsIterator.hasNext())
+				{
+					List<Integer> temp = postingsIterator.next().getValue();
+					if(!temp.contains(fileId)){
+						flag = false;
+						break;
+					}
+					else{
+						int frequency = 0;
+					    for (Integer i : temp) {
+					        if (i.equals(fileId)) {
+					          frequency++;
+					        }
+					    }
+					    count += frequency;
+					}
+						
+				}
+				
+				if(flag)
+					fileList.put(fileId, count);
+			}
+			
+			Map<String, Integer> result = new HashMap<String, Integer>();
+			
+			dir = new File(this.indexDir);
+			if(dir.exists())
+			{
+				ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+				Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+				Iterator<Entry<Integer, Integer>> i2 = fileList.entrySet().iterator();
+				while(i2.hasNext()){
+					Entry<Integer, Integer> entry = i2.next();
+					result.put(documentDictionary.get(entry.getKey()), entry.getValue());
+				}
+			}		
+			
+			ois.close();
+			
+			if(result.size()>0)
+				return result;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
 	public List<String> sort(Map<Integer, List<Integer>> index, Map<String, Integer> dictionary, int k)
 	{
-		Map<String, Integer> temp = postings(index, dictionary);
 		List<String> list = new ArrayList<String>();
-		
-		entriesSortedByValues(temp);
-		
-		Iterator<Entry<String, Integer>> i2 = temp.entrySet().iterator();
-		while(k>0){
-			Entry<String, Integer> entry = i2.next();
-			list.add(entry.getKey());
-			k--;
-		}
-		return list;
-	}
-	
-	public Map<String, Integer> postings(Map<Integer, List<Integer>> index, Map<String, Integer> dictionary)
-	{
 		Map<String, Integer> temp = new HashMap<String, Integer>();
+		
+		//System.out.println(index);
 		
 		Iterator<Entry<String, Integer>> i1 = dictionary.entrySet().iterator();
 		while(i1.hasNext()){
@@ -278,17 +345,7 @@ public class IndexReader {
 			temp.put(entry.getKey(), index.get(entry.getValue()).size());
 		}
 		
-		return temp;
-	}
-	
-	public List<String> sortAuthor(Map<String, List<Integer>> index, Map<String, String> dictionary, int k)
-	{
-		Map<String, Integer> temp = authorPostings(index, dictionary);
-		List<String> list = new ArrayList<String>();
-		
-		entriesSortedByValues(temp);
-		
-		Iterator<Entry<String, Integer>> i2 = temp.entrySet().iterator();
+		Iterator<Entry<String, Integer>> i2 = entriesSortedByValues(temp).iterator();
 		while(k>0){
 			Entry<String, Integer> entry = i2.next();
 			list.add(entry.getKey());
@@ -297,8 +354,9 @@ public class IndexReader {
 		return list;
 	}
 	
-	public Map<String, Integer> authorPostings(Map<String, List<Integer>> index, Map<String, String> dictionary)
+	public List<String> sortAuthor(Map<String, List<Integer>> index, Map<String, String> dictionary, int k)
 	{
+		List<String> list = new ArrayList<String>();
 		Map<String, Integer> temp = new HashMap<String, Integer>();
 		
 		Iterator<Entry<String, String>> i1 = dictionary.entrySet().iterator();
@@ -307,7 +365,98 @@ public class IndexReader {
 			temp.put(entry.getKey(), index.get(entry.getValue()).size());
 		}
 		
-		return temp;
+		Iterator<Entry<String, Integer>> i2 = entriesSortedByValues(temp).iterator();
+		while(k>0){
+			Entry<String, Integer> entry = i2.next();
+			list.add(entry.getKey());
+			k--;
+		}
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> postings(Map<Integer, List<Integer>> index, Map<String, Integer> dictionary, String term)
+	{
+		try{
+			Map<String, Integer> temp = new HashMap<String, Integer>();
+		
+			Map<Integer, Integer> temp1 = new HashMap<Integer, Integer>();		
+			//get postings->calculate frequency of doc in list->document dictionary->get filename->put in map
+			
+			List<Integer> postings = index.get(dictionary.get(term));
+			Iterator<Integer> i1 = postings.iterator();
+			while(i1.hasNext()){
+				int fileId = i1.next();
+				if(temp.containsKey(fileId))
+					temp1.put(fileId, temp.get(fileId)+1);
+				else
+					temp1.put(fileId, 1);
+			}
+			
+			File dir = new File(this.indexDir);
+			if(dir.exists())
+			{
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+				Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+				ois.close();
+				Iterator<Entry<Integer, Integer>> i2 = temp1.entrySet().iterator();
+				while(i2.hasNext()){
+					Entry<Integer, Integer> entry = i2.next();
+					temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+				}
+			}
+			
+			return temp;
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> authorPostings(Map<String, List<Integer>> index, Map<String, String> dictionary, String term)
+	{
+		try{
+			Map<String, Integer> temp = new HashMap<String, Integer>();
+		
+			Map<Integer, Integer> temp1 = new HashMap<Integer, Integer>();		
+			//get postings->calculate frequency of doc in list->document dictionary->get filename->put in map
+			List<Integer> postings = index.get(term);
+			Iterator<Integer> i1 = postings.iterator();
+			while(i1.hasNext()){
+				int fileId = i1.next();
+				if(temp.containsKey(fileId))
+					temp1.put(fileId, temp.get(fileId)+1);
+				else
+					temp1.put(fileId, 1);
+			}
+			
+			File dir = new File(this.indexDir);
+			if(dir.exists())
+			{
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+				Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+				ois.close();
+				Iterator<Entry<Integer, Integer>> i2 = temp1.entrySet().iterator();
+				while(i2.hasNext()){
+					Entry<Integer, Integer> entry = i2.next();
+					temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+				}
+			}
+			
+			return temp;
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {

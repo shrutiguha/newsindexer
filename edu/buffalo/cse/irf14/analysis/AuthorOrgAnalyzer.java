@@ -3,21 +3,16 @@ package edu.buffalo.cse.irf14.analysis;
 public class AuthorOrgAnalyzer implements Analyzer{
 
 	TokenStream tstream;
-	TokenFilterFactory factory;
 
 	public AuthorOrgAnalyzer(TokenStream tstream) {
 		// TODO Auto-generated constructor stub
 		this.tstream = tstream;
 	}
-	
-	public void setTokenFilterFactory(TokenFilterFactory factory)
-	{
-		this.factory = factory;
-	}
 
 	@Override
 	public boolean increment() throws TokenizerException {
 		// TODO Auto-generated method stub
+		analyze();
 		return false;
 	}
 
@@ -29,6 +24,7 @@ public class AuthorOrgAnalyzer implements Analyzer{
 	
 	public void analyze(){
 		try{	
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
 			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
 			if(filter != null)
 			{

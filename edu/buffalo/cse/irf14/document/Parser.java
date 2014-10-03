@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -94,8 +93,10 @@ public class Parser {
 		            			for(int i=0;i<placeDateArrayLength-1;i++)
 		            				place += placeDateArray[i].trim()+", ";
 		            			d.setField(FieldNames.PLACE, place.substring(0, place.length()-2).trim());
+		            			//System.out.println("Place: "+place);
 		            		}
 		            	}
+		            	
 		            }
 		            else if(placeDate)
 		            {

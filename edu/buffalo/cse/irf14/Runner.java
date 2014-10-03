@@ -54,6 +54,7 @@ public class Runner {
 				
 				for (String f : files) {
 					try {
+						//System.out.println(f);
 						d = Parser.parse(dir.getAbsolutePath() + File.separator +f);
 						writer.addDocument(d);
 					} catch (ParserException e) {
@@ -72,7 +73,8 @@ public class Runner {
 		}
 		
 		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
-		System.out.println("Key terms: "+reader.getTopK(5));
+		//System.out.println("Key terms: "+reader.query("said", "here"));
+		System.out.println("Key terms: "+reader.getTotalKeyTerms());
 	}
 
 }

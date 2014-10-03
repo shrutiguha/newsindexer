@@ -28,7 +28,7 @@ public class NumericTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		//System.out.println(text);
+		System.out.println(text);
 		
 		if(text.matches("[0-9]{2}[:][0-9]{2}[:][0-9]{2}"))
 		{}
@@ -38,7 +38,7 @@ public class NumericTokenFilter extends TokenFilter {
 		if(len!=8)
 		{
 			tstream.remove();
-			//System.out.println("Term Removed");
+			System.out.println("Term Removed");
 			
 		}
 		else
@@ -46,7 +46,7 @@ public class NumericTokenFilter extends TokenFilter {
 		
 			String mm=text.substring(4,6);
 			String dd=text.substring(6, 8);
-			//System.out.println(mm+":"+dd);
+			System.out.println(mm+":"+dd);
 			int m = Integer.parseInt(mm);
 			int d = Integer.parseInt(dd);
 			if(m>=1 && m<=12)
@@ -60,7 +60,7 @@ public class NumericTokenFilter extends TokenFilter {
 					
 					
 						tstream.remove();
-						//System.out.println("Term Removed");
+						System.out.println("Term Removed");
 						
 					
 				}
@@ -68,7 +68,7 @@ public class NumericTokenFilter extends TokenFilter {
 			else
 			{
 				tstream.remove();
-				//System.out.println("Term Removed");
+				System.out.println("Term Removed");
 				
 			}			
 		}
@@ -80,7 +80,7 @@ public class NumericTokenFilter extends TokenFilter {
 			text=text.replaceAll("[0-9]+[.][0-9]+", "");
 			text=text.replaceAll("[0-9]", "");
 		}
-		//System.out.println(text);
+		System.out.println(text);
         t.setTermText(text);
 	}
 

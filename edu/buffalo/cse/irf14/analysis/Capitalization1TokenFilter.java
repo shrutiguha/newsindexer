@@ -1,11 +1,8 @@
 package edu.buffalo.cse.irf14.analysis;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 
+public class Capitalization1TokenFilter extends TokenFilter {
 
-public class AccentTokenFilter extends TokenFilter {
-
-	public AccentTokenFilter(TokenStream stream) {
+	public Capitalization1TokenFilter(TokenStream stream) {
 		super(stream);
 	}
 
@@ -26,17 +23,28 @@ public class AccentTokenFilter extends TokenFilter {
 		return this.tstream;
 	}
 	
-
 	public void filter(Token t)
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-          System.out.println(text);
-		   text=text == null ? null: Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 		System.out.println(text);
+		while(tstream.hasNext())
+		{
+		if(tstream.hasNext())
+		{
+		Token t1=tstream.next();
+		String nextToken=t1.getTermText();
 		
+		if(!nextToken.matches("and|And|AND"))
+		{
+			System.out.println("T2 camel");
+			t.merge(t1);
+			String a=t.getTermText();
+			System.out.println(a);
+			tstream.remove();
+		}
+		}
+		}
 		
-        t.setTermText(text);
-	}
-
-}
+	
+}}

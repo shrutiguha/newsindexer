@@ -3,7 +3,6 @@ package edu.buffalo.cse.irf14.analysis;
 public class CategoryAnalyzer implements Analyzer{
 
 	TokenStream tstream;
-	TokenFilterFactory factory;
 
 	public CategoryAnalyzer(TokenStream tstream) {
 		// TODO Auto-generated constructor stub
@@ -13,12 +12,8 @@ public class CategoryAnalyzer implements Analyzer{
 	@Override
 	public boolean increment() throws TokenizerException {
 		// TODO Auto-generated method stub
+		analyze();
 		return false;
-	}
-	
-	public void setTokenFilterFactory(TokenFilterFactory factory)
-	{
-		this.factory = factory;
 	}
 
 	@Override
@@ -29,6 +24,7 @@ public class CategoryAnalyzer implements Analyzer{
 	
 	public void analyze(){
 		try{
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
 			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
 			if(filter != null)
 			{
