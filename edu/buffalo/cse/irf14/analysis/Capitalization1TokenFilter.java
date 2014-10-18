@@ -27,7 +27,7 @@ public class Capitalization1TokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 		while(tstream.hasNext())
 		{
 		if(tstream.hasNext())
@@ -37,10 +37,10 @@ public class Capitalization1TokenFilter extends TokenFilter {
 		
 		if(!nextToken.matches("and|And|AND"))
 		{
-			System.out.println("T2 camel");
+			////System.out.println("T2 camel");
 			t.merge(t1);
 			String a=t.getTermText();
-			System.out.println(a);
+			//System.out.println(a);
 			tstream.remove();
 		}
 		}

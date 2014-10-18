@@ -28,13 +28,13 @@ public class SymbolTokenFilter extends TokenFilter {
 		//Where i add the filter part
 		String text = t.getTermText();
 		
-		System.out.println(text);
+		//System.out.println(text);
 		
 		//Punctuation
 		text=text.replaceAll("[.] ", "");
 		text=text.replaceAll("! ", "");
 		text=text.replaceAll("[.?!]+$", "");
-		System.out.println(text);
+		//System.out.println(text);
 
 		//basic rules
 		text=text.replaceAll("'s", "");
@@ -51,7 +51,7 @@ public class SymbolTokenFilter extends TokenFilter {
 		text= text.replaceAll("shan't$","shall not");
 		text= text.replaceAll("won't","will not");
 		text=text.replaceAll("'", "");
-		System.out.println(text);
+		//System.out.println(text);
 
 		//Hyphens
 		
@@ -59,12 +59,12 @@ public class SymbolTokenFilter extends TokenFilter {
 			text=text.replaceAll("-", " ");
 			else if(!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]+[a-zA-Z]*[-][a-zA-Z]*[0-9]+[a-zA-Z]*[^a-zA-Z0-9]*")&&!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]*[a-zA-Z]*[-][a-zA-Z]*[0-9]+[a-zA-Z]*[^a-zA-Z0-9]*")&&!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]+[a-zA-Z]*[-][a-zA-Z]*[0-9]*[a-zA-Z]+[^a-zA-Z0-9]*"))
 				text=text.replaceAll("-+", "");
-		System.out.println(text);
+		//System.out.println(text);
 
 			//if(!text.matches("[a-zA-Z0-9]+-[0-9]+"))
 					
 		t.setTermText(text);
-		System.out.println(text);
+		//System.out.println(text);
 
 		
 	}

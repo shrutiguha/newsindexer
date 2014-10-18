@@ -31,20 +31,20 @@ public class DateTokenFilter extends TokenFilter {
 		
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 		
 		if(text.matches("[0-9]+AD[,.]?|[0-9]+BC[,.]?"))
 		{
 			String copy=text;
 			text=text.replaceAll("AD|BC", "");
-			System.out.println(text);
+			//System.out.println(text);
 			if(text.contains(","))
 				t.isComma=true;
 			if(text.contains("."))
 				t.isDot=true;
 			text=text.replaceAll(",", "");
 			text=text.replaceAll("[.]", "");
-			System.out.println(text);
+			//System.out.println(text);
 			if(text.length()==1)
 				text="000"+text+"0101";
 			if(text.length()==2)
@@ -60,8 +60,8 @@ public class DateTokenFilter extends TokenFilter {
 			else if(t.isDot)
 				text=text+".";
 			t.setTermText(text);
-			System.out.println("final"+text);
-			System.out.println(text);
+			//System.out.println("final"+text);
+			//System.out.println(text);
 
 		}
 		if(isNumber(text))
@@ -97,7 +97,7 @@ public class DateTokenFilter extends TokenFilter {
 					else if(t1.isDot)
 						text=text+".";
 					t.setTermText(text);
-					System.out.println(text);
+					//System.out.println(text);
 					tstream.saveCurrent();
 					tstream.remove();
 					tstream.setCurrent();
@@ -118,13 +118,13 @@ public class DateTokenFilter extends TokenFilter {
 			if(text.contains("."))
 				t.isDot=true;
 			text=getDate(text);
-				System.out.println("Date:"+text);
+				//System.out.println("Date:"+text);
 			if(tstream.hasNext())
 			{
 				Token t1=tstream.next();
 				String nextTerm=t1.getTermText();
 				nextTerm=nextTerm.toLowerCase();
-				System.out.println(nextTerm);
+				//System.out.println(nextTerm);
 				if(isMonth(nextTerm))
 				
 				{
@@ -132,9 +132,9 @@ public class DateTokenFilter extends TokenFilter {
 						t1.isComma=true;
 					if(nextTerm.contains("."))
 						t1.isDot=true;
-					System.out.println(nextTerm);
+					//System.out.println(nextTerm);
 					nextTerm=getMonth(nextTerm);
-					System.out.println("Month:"+nextTerm);
+					//System.out.println("Month:"+nextTerm);
 				
 					if(tstream.hasNext())
 					{
@@ -149,7 +149,7 @@ public class DateTokenFilter extends TokenFilter {
 							if(nextTerm1.contains("."))
 								t2.isDot=true;
 							nextTerm1=nextTerm1.replaceAll("[,]", "");
-								System.out.println("Year:"+nextTerm1);
+								//System.out.println("Year:"+nextTerm1);
 								//int year=Integer.parseInt(nextTerm1);
 								if(t2.isComma)
 								text=nextTerm1+nextTerm+text+",";
@@ -158,7 +158,7 @@ public class DateTokenFilter extends TokenFilter {
 								else
 									text=nextTerm1+nextTerm+text;
 								t.setTermText(text);
-								System.out.println("final:"+text);
+								//System.out.println("final:"+text);
 								tstream.saveCurrent();
 								tstream.remove();
 								tstream.moveBack();
@@ -174,7 +174,7 @@ public class DateTokenFilter extends TokenFilter {
 								text="1900"+nextTerm+text+".";
 							else
 							text="1900"+nextTerm+text;
-							System.out.println("final:"+text);
+							//System.out.println("final:"+text);
 							t.setTermText(text);
 							tstream.moveBack();
 							tstream.remove();
@@ -190,7 +190,7 @@ public class DateTokenFilter extends TokenFilter {
 						t1.isDot=true;
 					nextTerm=nextTerm.replaceAll("[,]", "");
 					nextTerm=nextTerm.replaceAll("[.]", "");
-					System.out.println("Year:"+nextTerm);
+					//System.out.println("Year:"+nextTerm);
 					if(tstream.hasNext())
 					{
 						tstream.saveCurrent();
@@ -206,7 +206,7 @@ public class DateTokenFilter extends TokenFilter {
 							nextTerm1=nextTerm1.replaceAll("[,]", "");
 							nextTerm1=nextTerm1.replaceAll("[.]", "");
 							tstream.saveCurrent();
-							System.out.println("Month:"+nextTerm1);
+							//System.out.println("Month:"+nextTerm1);
 							//int year=Integer.parseInt(nextTerm1);
 							if(t2.isComma)
 								text=nextTerm+nextTerm1+text+",";
@@ -215,7 +215,7 @@ public class DateTokenFilter extends TokenFilter {
 							else
 							text=nextTerm+nextTerm1+text;
 							t.setTermText(text);
-							System.out.println("final:"+text);
+							//System.out.println("final:"+text);
 							tstream.remove();
 							tstream.moveBack();
 							tstream.remove();
@@ -230,7 +230,7 @@ public class DateTokenFilter extends TokenFilter {
 								text=nextTerm+"01"+text+".";
 							else
 							text=nextTerm+"01"+text;
-							System.out.println("final:"+text);
+							//System.out.println("final:"+text);
 
 							t.setTermText(text);
 							tstream.moveBack();
@@ -252,7 +252,7 @@ public class DateTokenFilter extends TokenFilter {
 					t.isDot=true;
 				text=text.replaceAll("[,]", "");
 				text=text.replaceAll("[.]", "");
-				System.out.println("Year");
+				//System.out.println("Year");
 				if(tstream.hasNext())
 				{
 					Token t1=tstream.next();
@@ -264,7 +264,7 @@ public class DateTokenFilter extends TokenFilter {
 						if(nextTerm.contains("."))
 							t1.isDot=true;
 						nextTerm=getMonth(nextTerm);
-						System.out.println("Month:"+nextTerm);
+						//System.out.println("Month:"+nextTerm);
 					
 						if(tstream.hasNext())
 						{
@@ -281,7 +281,7 @@ public class DateTokenFilter extends TokenFilter {
 							nextTerm1=nextTerm1.replaceAll("[.]", "");
 									tstream.saveCurrent();
 									nextTerm1=getDate(nextTerm1);
-									System.out.println("Date:"+nextTerm1);
+									//System.out.println("Date:"+nextTerm1);
 									//int year=Integer.parseInt(nextTerm1);
 									if(t2.isComma)
 										text=text+nextTerm+nextTerm1+",";
@@ -289,7 +289,7 @@ public class DateTokenFilter extends TokenFilter {
 										text=text+nextTerm+nextTerm1+".";
 									else
 									text=text+nextTerm+nextTerm1;
-									System.out.println("final:"+text);
+									//System.out.println("final:"+text);
                                     t.setTermText(text);
 									tstream.remove();
 									tstream.moveBack();
@@ -323,7 +323,7 @@ public class DateTokenFilter extends TokenFilter {
 						else
 						text=text+"01"+"01";
 						t.setTermText(text);
-						System.out.println("final:"+text);
+						//System.out.println("final:"+text);
 
 					}
 				}
@@ -336,12 +336,12 @@ public class DateTokenFilter extends TokenFilter {
 				if(text.contains("."))
 					t.isDot=true;
 				text=getMonth(text);
-				System.out.println("Month:"+text);
+				//System.out.println("Month:"+text);
 				if(tstream.hasNext())
 				{
 					Token t1=tstream.next();
 					String nextTerm=t1.getTermText();
-					System.out.println(nextTerm);
+					//System.out.println(nextTerm);
 					if(isYear(nextTerm))
 					{
 						if(nextTerm.contains(","))
@@ -350,7 +350,7 @@ public class DateTokenFilter extends TokenFilter {
 							t1.isDot=true;
 						nextTerm=nextTerm.replaceAll("[,]", "");
 						nextTerm=nextTerm.replaceAll("[.]", "");
-						System.out.println("Year:"+nextTerm);
+						//System.out.println("Year:"+nextTerm);
 					
 						if(tstream.hasNext())
 						{
@@ -367,7 +367,7 @@ public class DateTokenFilter extends TokenFilter {
 								nextTerm1=nextTerm1.replaceAll("[.]", "");
 									tstream.saveCurrent();
 									nextTerm1=getDate(nextTerm1);
-									System.out.println("Date:"+nextTerm1);
+									//System.out.println("Date:"+nextTerm1);
 									//int year=Integer.parseInt(nextTerm1);
 									if(t2.isComma)
 										text=nextTerm+text+nextTerm1+",";
@@ -376,7 +376,7 @@ public class DateTokenFilter extends TokenFilter {
 									else
 									text=nextTerm+text+nextTerm1;
 									t.setTermText(text);
-									System.out.println("final:"+text);
+									//System.out.println("final:"+text);
 
 									tstream.remove();
 									tstream.moveBack();
@@ -393,7 +393,7 @@ public class DateTokenFilter extends TokenFilter {
 								else
 								text=nextTerm+text+"01";
 								t.setTermText(text);
-								System.out.println("final:"+text);
+								//System.out.println("final:"+text);
 								tstream.moveBack();
 								tstream.remove();
 								tstream.setCurrent();
@@ -410,7 +410,7 @@ public class DateTokenFilter extends TokenFilter {
 							nextTerm=nextTerm.replaceAll("[,]", "");
 							nextTerm=nextTerm.replaceAll("[.]", "");
 							nextTerm=getDate(nextTerm);
-						System.out.println("Date:"+nextTerm);
+						//System.out.println("Date:"+nextTerm);
 						if(tstream.hasNext())
 						{
 							Token t2=tstream.next();
@@ -424,7 +424,7 @@ public class DateTokenFilter extends TokenFilter {
 								nextTerm1=nextTerm1.replaceAll("[.]", "");
 								nextTerm1=nextTerm1.replaceAll("[,]", "");
 								tstream.saveCurrent();
-								System.out.println("Year:"+nextTerm1);
+								//System.out.println("Year:"+nextTerm1);
 								if(t2.isComma)
 									text=nextTerm1+text+nextTerm+",";
 								else if(t2.isDot)
@@ -432,7 +432,7 @@ public class DateTokenFilter extends TokenFilter {
 								else
 								text=nextTerm1+text+nextTerm;
 								t.setTermText(text);
-								System.out.println("final:"+text);
+								//System.out.println("final:"+text);
 
 								tstream.remove();
 								tstream.moveBack();
@@ -448,7 +448,7 @@ public class DateTokenFilter extends TokenFilter {
 									text="1900"+text+nextTerm+".";
 								else
 								text="1900"+text+nextTerm;
-								System.out.println("final:"+text);
+								//System.out.println("final:"+text);
 								t.setTermText(text);
 								tstream.moveBack();
 								tstream.remove();
@@ -464,7 +464,7 @@ public class DateTokenFilter extends TokenFilter {
 //								text="1900"+text+"01"+".";
 //							else
 //							text="1900"+text+"01";
-//							System.out.println("final:"+text);
+//							//System.out.println("final:"+text);
 //							t.setTermText(text);
 							
 						}
@@ -481,11 +481,11 @@ public class DateTokenFilter extends TokenFilter {
 			{
 			String year[]=text.split("-");
 			String prefix=year[0].substring(0, 2);
-			System.out.println(prefix);
+			//System.out.println(prefix);
 			year[0]=year[0]+"0101";
 			year[1]=prefix+year[1]+"0101";
 			text=year[0]+"-"+year[1];
-			System.out.println(text);
+			//System.out.println(text);
 			}
 			else
 			{
@@ -493,7 +493,7 @@ public class DateTokenFilter extends TokenFilter {
 				year[0]=year[0]+"0101";
 				year[1]=year[1]+"0101";
 				text=year[0]+"-"+year[1];
-				System.out.println(text);
+				//System.out.println(text);
 			}
 			if(t.isComma)
 				text=text+",";
@@ -502,12 +502,12 @@ public class DateTokenFilter extends TokenFilter {
 			t.setTermText(text);
 			
 		}
-		System.out.println(text);
+		//System.out.println(text);
 		//if(text.matches("[0-9]+[:][0-9]+[AM][,.]?|[0-9]+[:][0-9]+[PM][,.]?|[0-9]+[:][0-9]+[:]?[0-9]*[PM][,.]?|[0-9]+[:][0-9]+[:]?[0-9]*[AM][,.]?"))
 		if(text.equalsIgnoreCase("5:15PM."))
 		{
 			text=text.toLowerCase();
-			System.out.println(text);
+			//System.out.println(text);
 			//PM
 			if(text.contains("pm"))
 			{
@@ -516,12 +516,12 @@ public class DateTokenFilter extends TokenFilter {
 				if(text.contains(","))
 					t.isComma=true;
 			text=text.replaceAll("pm", "");
-			System.out.println(text);
+			//System.out.println(text);
 			 text=text.replaceAll("[,]", "");
-				System.out.println(text);
+				//System.out.println(text);
 
 			text=text.replaceAll("[.]", "");
-			System.out.println(text);
+			//System.out.println(text);
 			String time[]=text.split(":");
 			if(time.length==1)
 			{
@@ -530,19 +530,19 @@ public class DateTokenFilter extends TokenFilter {
 				{
 					hour=hour+12;
 					time[0]=Integer.toString(hour);
-					System.out.println("Newhour="+time[0]);
+					//System.out.println("Newhour="+time[0]);
 				}
 				text=time[0]+":00:00";
 			}
 			else if (time.length==2)
 			{
-			System.out.println(time[0]+" "+time[1]);
+			//System.out.println(time[0]+" "+time[1]);
 			int hour=Integer.parseInt(time[0]);
 			if(hour>=1&&hour<=12)
 			{
 				hour=hour+12;
 				time[0]=Integer.toString(hour);
-				System.out.println("Newhour="+time[0]);
+				//System.out.println("Newhour="+time[0]);
 			}
 			if(time[1].length()==1)
 			{
@@ -551,7 +551,7 @@ public class DateTokenFilter extends TokenFilter {
 			if(time.length==2)
 			{
 			text=time[0]+":"+time[1]+":00";
-			System.out.println(text);
+			//System.out.println(text);
 			}
 			}
 			else if(time.length==3)
@@ -561,12 +561,12 @@ public class DateTokenFilter extends TokenFilter {
 				text=time[0]+":"+time[1]+":"+time[2];
 			}
 			
-			System.out.println(text);
+			//System.out.println(text);
 			if(t.isComma)
 				text=text+",";
 			else if(t.isDot)
 				text=text+".";
-			System.out.println(text);
+			//System.out.println(text);
 			t.setTermText(text);
 			}
 			else if(text.contains("am"))
@@ -576,12 +576,12 @@ public class DateTokenFilter extends TokenFilter {
 				if(text.contains(","))
 					t.isComma=true;
 			text=text.replaceAll("am", "");
-			System.out.println(text);
+			//System.out.println(text);
 			 text=text.replaceAll("[,]", "");
-				System.out.println(text);
+				//System.out.println(text);
 
 			text=text.replaceAll("[.]", "");
-			System.out.println(text);
+			//System.out.println(text);
 			String time[]=text.split(":");
 			if(time.length==1)
 			{
@@ -591,7 +591,7 @@ public class DateTokenFilter extends TokenFilter {
 			}
 			if(time.length==2)
 			{
-				System.out.println(time[0]+" "+time[1]);
+				//System.out.println(time[0]+" "+time[1]);
 			if(time[0].length()==1)
 				time[0]="0"+time[0];
 			if(time[1].length()==1)
@@ -599,7 +599,7 @@ public class DateTokenFilter extends TokenFilter {
 			if(time.length==2)
 			{
 			text=time[0]+":"+time[1]+":00";
-			System.out.println(text);
+			//System.out.println(text);
 			}
 			}
 			else if(time.length==3)
@@ -609,12 +609,12 @@ public class DateTokenFilter extends TokenFilter {
 				text=time[0]+":"+time[1]+":"+time[2];
 			}
 			
-			System.out.println(text);
+			//System.out.println(text);
 			if(t.isComma)
 				text=text+",";
 			else if(t.isDot)
 				text=text+".";
-			System.out.println(text);
+			//System.out.println(text);
 			t.setTermText(text);
 			}
 		}
@@ -634,14 +634,14 @@ public class DateTokenFilter extends TokenFilter {
 							t1.isDot=true;
 						if(nextTerm.contains(","))
 							t1.isComma=true;
-					System.out.println(text);
+					//System.out.println(text);
 					 text=text.replaceAll("[,]", "");
 					 nextTerm=nextTerm.replaceAll("[,]", "");
-						System.out.println(text);
+						//System.out.println(text);
 
 					text=text.replaceAll("[.]", "");
 					nextTerm=nextTerm.replaceAll("[.]", "");
-					System.out.println(text);
+					//System.out.println(text);
 					String time[]=text.split(":");
 					if(time.length==1)
 					{
@@ -650,19 +650,19 @@ public class DateTokenFilter extends TokenFilter {
 						{
 							hour=hour+12;
 							time[0]=Integer.toString(hour);
-							System.out.println("Newhour="+time[0]);
+							//System.out.println("Newhour="+time[0]);
 						}
 						text=time[0]+":00:00";
 					}
 					else if (time.length==2)
 					{
-					System.out.println(time[0]+" "+time[1]);
+					//System.out.println(time[0]+" "+time[1]);
 					int hour=Integer.parseInt(time[0]);
 					if(hour>=1&&hour<=12)
 					{
 						hour=hour+12;
 						time[0]=Integer.toString(hour);
-						System.out.println("Newhour="+time[0]);
+						//System.out.println("Newhour="+time[0]);
 					}
 					if(time[1].length()==1)
 					{
@@ -671,7 +671,7 @@ public class DateTokenFilter extends TokenFilter {
 					if(time.length==2)
 					{
 					text=time[0]+":"+time[1]+":00";
-					System.out.println(text);
+					//System.out.println(text);
 					}
 					}
 					else if(time.length==3)
@@ -680,14 +680,14 @@ public class DateTokenFilter extends TokenFilter {
 						time[2]="0"+time[2];
 						text=time[0]+":"+time[1]+":"+time[2];
 					}
-					System.out.println(text);
+					//System.out.println(text);
 					if(t1.isComma)
 						text=text+",";
 					else if(t1.isDot)
 						text=text+".";
-					System.out.println(text);
+					//System.out.println(text);
 					tstream.saveCurrent();
-					System.out.println("final:"+text);
+					//System.out.println("final:"+text);
 					t.setTermText(text);
 					
 					tstream.remove();
@@ -701,12 +701,12 @@ public class DateTokenFilter extends TokenFilter {
 						if(nextTerm.contains(","))
 							t1.isComma=true;
 					text=text.replaceAll(",", "");
-					System.out.println(text);
+					//System.out.println(text);
 					 nextTerm=nextTerm.replaceAll("[,]", "");
-						System.out.println(text);
+						//System.out.println(text);
 						nextTerm=nextTerm.replaceAll("[.]", "");
 					text=text.replaceAll("[.]", "");
-					System.out.println(text);
+					//System.out.println(text);
 					String time[]=text.split(":");
 					if(time.length==1)
 					{
@@ -716,7 +716,7 @@ public class DateTokenFilter extends TokenFilter {
 					}
 					if(time.length==2)
 					{
-						System.out.println(time[0]+" "+time[1]);
+						//System.out.println(time[0]+" "+time[1]);
 					if(time[0].length()==1)
 						time[0]="0"+time[0];
 					if(time[1].length()==1)
@@ -724,7 +724,7 @@ public class DateTokenFilter extends TokenFilter {
 					if(time.length==2)
 					{
 					text=time[0]+":"+time[1]+":00";
-					System.out.println(text);
+					//System.out.println(text);
 					}
 					}
 					else if(time.length==3)
@@ -733,14 +733,14 @@ public class DateTokenFilter extends TokenFilter {
 						time[2]="0"+time[2];
 						text=time[0]+":"+time[1]+":"+time[2];
 					}
-					System.out.println(text);
+					//System.out.println(text);
 					if(t1.isComma)
 						text=text+",";
 					else if(t1.isDot)
 						text=text+".";
-					System.out.println(text);
+					//System.out.println(text);
 					tstream.saveCurrent();
-					System.out.println("final:"+text);
+					//System.out.println("final:"+text);
 					t.setTermText(text);
 					tstream.remove();
 					tstream.setCurrent();
@@ -759,7 +759,7 @@ public class DateTokenFilter extends TokenFilter {
 	
 	
 //		
-//		System.out.println(text);
+//		//System.out.println(text);
 //		t.setTermText(text);
 //	}
 //	
@@ -777,7 +777,7 @@ public boolean isNumber(String s)
 
 	if(s.matches("[0-9]+[,.]|[0-9]+|[,.][0-9]+"))
 	{
-		System.out.println("Number");
+		//System.out.println("Number");
 		s=s.replaceAll("[,]", "");
 		s=s.replaceAll("[.]", "");
 		return true;
@@ -792,7 +792,7 @@ public boolean isDate(String s)
 	
 	if(s.matches("[0-9]+[,.]|[0-9]+|[.,][0-9]+"))
 	{
-		System.out.println("Number");
+		//System.out.println("Number");
 		s=s.replaceAll("[,]", "");
 		s=s.replaceAll("[.]", "");
 		int date=Integer.parseInt(s);
@@ -812,7 +812,7 @@ public String getDate(String s)
 	int date=Integer.parseInt(s);
 	if(date>=1 && date<=9)
 		s="0"+s;
-	System.out.println(s);
+	//System.out.println(s);
 	return s;
 }
 

@@ -8,6 +8,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.buffalo.cse.irf14.SearchRunner;
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
@@ -166,13 +171,13 @@ public class IndexerTest {
 		
 		for (int i = 0; i <len; i++) {
 			queryTerms[i] = getAnalyzedTerm(queryTerms[i]);
-			System.out.println("Query:"+queryTerms[i]);
+			//System.out.println("Query:"+queryTerms[i]);
 			
 		}
 		
-		/*
-		 * Dummy inverted index
-		 */
+		
+		 // Dummy inverted index
+		 
 		HashMap<String, Integer>[] invIdx = prepareIndex(queryTerms);
 		HashMap<String, Integer> expected;
 		

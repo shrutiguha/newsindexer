@@ -27,15 +27,15 @@ public class CapitalizationTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		//System.out.println(text);
+		////System.out.println(text);
 		int flag=0;
 		boolean s=false;
 		if(isStart())
 		{
-			//System.out.println("First word");
+			////System.out.println("First word");
 			if(isUpper(text))
 			{
-				//System.out.println("It is uppercase");
+				////System.out.println("It is uppercase");
 				tstream.saveCurrent();
 			while(!text.matches(".+[.?!]") && !isEnd())
 			{ 
@@ -50,13 +50,13 @@ public class CapitalizationTokenFilter extends TokenFilter {
 			{
 				//check for camel case
 				tstream.setCurrent();
-				//System.out.println("The whole sentence is not uppercase");
+				////System.out.println("The whole sentence is not uppercase");
 				//text=text.toLowerCase();
 
 				if(isTitle(text))
 				{
 					int x=0;
-					//System.out.println("T1 camel");
+					////System.out.println("T1 camel");
 					while(!isEnd() && !text.matches(".+[.?!]"))
 					{
 					if(tstream.hasNext())
@@ -67,10 +67,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 					if(isTitle(nextToken))
 					{
 						x++;
-						//System.out.println("T2 camel");
+						////System.out.println("T2 camel");
 						t.merge(t1);
 						String a=t.getTermText();
-						//System.out.println(a);
+						////System.out.println(a);
 						tstream.remove();
 					}
 					else
@@ -87,10 +87,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 					if(nextToken.matches(".+[.?!]"))
 					{
 						x++;
-						//System.out.println("T2 camel");
+						////System.out.println("T2 camel");
 						t.merge(t1);
 						String a=t.getTermText();
-						//System.out.println(a);
+						////System.out.println(a);
 						tstream.remove();
 					}
 					else
@@ -113,7 +113,7 @@ public class CapitalizationTokenFilter extends TokenFilter {
 		}
 			else
 			{
-				//System.out.println("Whole sentence is in uppercase");
+				////System.out.println("Whole sentence is in uppercase");
 				tstream.setCurrent();
 				text=text.toLowerCase();
 				t.setTermText(text);
@@ -124,10 +124,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 					{
 					Token t1=tstream.next();
 					temp1=t1.getTermText();
-					//System.out.println("next:"+temp1);
+					////System.out.println("next:"+temp1);
 					temp1=temp1.toLowerCase();
 					t1.setTermText(temp1);	
-					//System.out.println("temp:"+temp1);
+					////System.out.println("temp:"+temp1);
 					}
 				}while(!isEnd() && !text.matches(".+[.?!]"));
 				String temp1=null;
@@ -135,11 +135,11 @@ public class CapitalizationTokenFilter extends TokenFilter {
 				{
 				Token t1=tstream.next();
 				temp1=t1.getTermText();
-				//System.out.println("next:"+temp1);
+				////System.out.println("next:"+temp1);
 				temp1=temp1.toLowerCase();
 				t1.setTermText(temp1);	
-				//System.out.println("temp:"+temp1);
-				//System.out.println(text);
+				////System.out.println("temp:"+temp1);
+				////System.out.println(text);
 			tstream.setCurrent();
 			}}
 		}
@@ -150,7 +150,7 @@ public class CapitalizationTokenFilter extends TokenFilter {
 			t.setTermText(text);
 			if(isTitle(text))
 			{
-				//System.out.println("T1 camel");
+				////System.out.println("T1 camel");
 				while(!isEnd()&& !text.matches(".+[.?!]"))
 				{
 				if(tstream.hasNext())
@@ -161,10 +161,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 				if(isTitle(nextToken))
 				{
 					x++;
-					//System.out.println("T2 camel");
+					////System.out.println("T2 camel");
 					t.merge(t1);
 					String a=t.getTermText();
-					//System.out.println(a);
+					////System.out.println(a);
 					tstream.remove();
 				}
 				else
@@ -183,10 +183,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 					if(isTitle(nextToken))
 					{
 					x++;
-					//System.out.println("T2 camel");
+					////System.out.println("T2 camel");
 					t.merge(t1);
 					String a=t.getTermText();
-					//System.out.println(a);
+					////System.out.println(a);
 					tstream.remove();
 				}
 				else
@@ -209,13 +209,13 @@ public class CapitalizationTokenFilter extends TokenFilter {
 		{
 			tstream.saveCurrent();
 
-			//System.out.println("Not the first word");
+			////System.out.println("Not the first word");
 			
 
 			
 			if(isTitle(text))
 			{
-				//System.out.println("T1 camel");
+				////System.out.println("T1 camel");
 				while(!isEnd()&& !text.matches(".+[.?!]"))
 				{
 				if(tstream.hasNext())
@@ -225,10 +225,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 				
 				if(isTitle(nextToken))
 				{
-					//System.out.println("T2 camel");
+					////System.out.println("T2 camel");
 					t.merge(t1);
 					String a=t.getTermText();
-					//System.out.println(a);
+					////System.out.println(a);
 					tstream.remove();
 				}
 				else
@@ -245,10 +245,10 @@ public class CapitalizationTokenFilter extends TokenFilter {
 				if(nextToken.matches(".+[.?!]"))
 				{
 					
-					//System.out.println("T2 camel");
+					////System.out.println("T2 camel");
 					t.merge(t1);
 					String a=t.getTermText();
-					//System.out.println(a);
+					////System.out.println(a);
 					tstream.remove();
 				}
 				else
@@ -263,7 +263,7 @@ public class CapitalizationTokenFilter extends TokenFilter {
 
 				
 		}
-		//System.out.println(text);
+		////System.out.println(text);
 
 		}
 	
@@ -324,7 +324,7 @@ public boolean checkNextToken()
 			
 	}
 	tstream.moveBack();
-	//System.out.println("Nextword Not Uppercase");
+	////System.out.println("Nextword Not Uppercase");
 	return false;
 }
 public boolean checkNextTokenCase()
@@ -339,7 +339,7 @@ public boolean checkNextTokenCase()
 			
 	}
 	tstream.moveBack();
-	//System.out.println("Nextword Not Uppercase");
+	////System.out.println("Nextword Not Uppercase");
 	return false;
 }
 public boolean isEnd()

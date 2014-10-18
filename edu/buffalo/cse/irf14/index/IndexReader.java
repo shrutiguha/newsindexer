@@ -137,7 +137,7 @@ public class IndexReader {
 							Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "term");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							map = postings((TreeMap<Integer, TermData>) ois.readObject(), dictionary, term);
 							ois.close();
 							return map;
 						case AUTHOR:
@@ -153,7 +153,7 @@ public class IndexReader {
 							dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "category");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
-							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							map = postings((TreeMap<Integer, TermData>) ois.readObject(), dictionary, term);
 							ois.close();
 							return map;
 						case PLACE: 
@@ -161,7 +161,7 @@ public class IndexReader {
 							dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "place");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
-							map = postings((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, term);
+							map = postings((TreeMap<Integer, TermData>) ois.readObject(), dictionary, term);
 							ois.close();
 							return map;
 						default: return null;
@@ -202,7 +202,7 @@ public class IndexReader {
 							Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "term");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							list = sort((TreeMap<Integer, TermData>) ois.readObject(), dictionary, k);
 							ois.close();
 							return list;
 						case AUTHOR:
@@ -218,7 +218,7 @@ public class IndexReader {
 							dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "category");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Category Index.ser"));
-							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							list = sort((TreeMap<Integer, TermData>) ois.readObject(), dictionary, k);
 							ois.close();
 							return list;
 						case PLACE: 
@@ -226,7 +226,7 @@ public class IndexReader {
 							dictionary = (TreeMap<String, Integer>) ois.readObject();
 							dir = new File(this.indexDir+ File.separator+ "place");
 							ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Place Index.ser"));
-							list = sort((TreeMap<Integer, List<Integer>>) ois.readObject(), dictionary, k);
+							list = sort((TreeMap<Integer, TermData>) ois.readObject(), dictionary, k);
 							ois.close();
 							return list;
 						default: return null;
@@ -263,10 +263,15 @@ public class IndexReader {
 			Map<String, Integer> dictionary = (TreeMap<String, Integer>) ois.readObject();
 			dir = new File(this.indexDir+ File.separator+ "term");
 			ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-			Map<Integer, List<Integer>> index = (Map<Integer, List<Integer>>) ois.readObject();
+			Map<Integer, TermData> index = (Map<Integer, TermData>) ois.readObject();
 			Map<Integer, Integer> uniqueFileList = new HashMap<Integer, Integer>();
 			for(String term : terms){
-				List<Integer> tempPostings = index.get(dictionary.get(term)); 
+				Map<Integer, Integer> termFrequency = index.get(dictionary.get(term)).getTermFrequency();
+				Iterator<Entry<Integer, Integer>> tfIterator = termFrequency.entrySet().iterator();
+				List<Integer> tempPostings = new ArrayList<Integer>();
+				while(tfIterator.hasNext())
+					tempPostings.add(tfIterator.next().getKey());
+				 
 				postings.put(term, tempPostings);
 				Iterator<Integer> i = tempPostings.iterator();
 				while(i.hasNext())
@@ -332,17 +337,22 @@ public class IndexReader {
 		return null;
 	}
 	
-	public List<String> sort(Map<Integer, List<Integer>> index, Map<String, Integer> dictionary, int k)
+	public List<String> sort(Map<Integer, TermData> index, Map<String, Integer> dictionary, int k)
 	{
 		List<String> list = new ArrayList<String>();
 		Map<String, Integer> temp = new HashMap<String, Integer>();
 		
-		//System.out.println(index);
-		
 		Iterator<Entry<String, Integer>> i1 = dictionary.entrySet().iterator();
 		while(i1.hasNext()){
 			Entry<String, Integer> entry = i1.next();
-			temp.put(entry.getKey(), index.get(entry.getValue()).size());
+			TermData data = index.get(entry.getValue());
+			Map<Integer, Integer> termFrequency = data.getTermFrequency();
+			Iterator<Entry<Integer, Integer>> tfIterator = termFrequency.entrySet().iterator();
+			int count = 0;
+			while(tfIterator.hasNext())
+				count += tfIterator.next().getValue();
+			
+			temp.put(entry.getKey(), count);
 		}
 		
 		Iterator<Entry<String, Integer>> i2 = entriesSortedByValues(temp).iterator();
@@ -375,38 +385,40 @@ public class IndexReader {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String, Integer> postings(Map<Integer, List<Integer>> index, Map<String, Integer> dictionary, String term)
+	public Map<String, Integer> authorPostings(Map<String, List<Integer>> index, Map<String, String> dictionary, String term)
 	{
 		try{
 			Map<String, Integer> temp = new HashMap<String, Integer>();
 		
 			Map<Integer, Integer> temp1 = new HashMap<Integer, Integer>();		
 			//get postings->calculate frequency of doc in list->document dictionary->get filename->put in map
-			
-			List<Integer> postings = index.get(dictionary.get(term));
-			Iterator<Integer> i1 = postings.iterator();
-			while(i1.hasNext()){
-				int fileId = i1.next();
-				if(temp.containsKey(fileId))
-					temp1.put(fileId, temp.get(fileId)+1);
-				else
-					temp1.put(fileId, 1);
-			}
-			
-			File dir = new File(this.indexDir);
-			if(dir.exists())
-			{
-				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
-				Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
-				ois.close();
-				Iterator<Entry<Integer, Integer>> i2 = temp1.entrySet().iterator();
-				while(i2.hasNext()){
-					Entry<Integer, Integer> entry = i2.next();
-					temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+			List<Integer> postings = index.get(term);
+			if(postings != null){
+				Iterator<Integer> i1 = postings.iterator();
+				while(i1.hasNext()){
+					int fileId = i1.next();
+					if(temp.containsKey(fileId))
+						temp1.put(fileId, temp.get(fileId)+1);
+					else
+						temp1.put(fileId, 1);
 				}
+				
+				File dir = new File(this.indexDir);
+				if(dir.exists())
+				{
+					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+					Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+					ois.close();
+					Iterator<Entry<Integer, Integer>> i2 = temp1.entrySet().iterator();
+					while(i2.hasNext()){
+						Entry<Integer, Integer> entry = i2.next();
+						temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+					}
+				}
+				return temp;
 			}
 			
-			return temp;
+			return null;
 			
 		}
 		catch(Exception e)
@@ -418,37 +430,32 @@ public class IndexReader {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String, Integer> authorPostings(Map<String, List<Integer>> index, Map<String, String> dictionary, String term)
+	public Map<String, Integer> postings(Map<Integer, TermData> index, Map<String, Integer> dictionary, String term)
 	{
 		try{
 			Map<String, Integer> temp = new HashMap<String, Integer>();
-		
-			Map<Integer, Integer> temp1 = new HashMap<Integer, Integer>();		
+			
 			//get postings->calculate frequency of doc in list->document dictionary->get filename->put in map
-			List<Integer> postings = index.get(term);
-			Iterator<Integer> i1 = postings.iterator();
-			while(i1.hasNext()){
-				int fileId = i1.next();
-				if(temp.containsKey(fileId))
-					temp1.put(fileId, temp.get(fileId)+1);
-				else
-					temp1.put(fileId, 1);
-			}
+			if(dictionary.get(term) != null){
+				TermData termData = index.get(dictionary.get(term));
 			
-			File dir = new File(this.indexDir);
-			if(dir.exists())
-			{
-				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
-				Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
-				ois.close();
-				Iterator<Entry<Integer, Integer>> i2 = temp1.entrySet().iterator();
-				while(i2.hasNext()){
-					Entry<Integer, Integer> entry = i2.next();
-					temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+				Map<Integer, Integer> postings = termData.getTermFrequency();
+				
+				File dir = new File(this.indexDir);
+				if(dir.exists())
+				{
+					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+					Map<Integer, String> documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+					ois.close();
+					Iterator<Entry<Integer, Integer>> i1 = postings.entrySet().iterator();
+					while(i1.hasNext()){
+						Entry<Integer, Integer> entry = i1.next();
+						temp.put(documentDictionary.get(entry.getKey()), entry.getValue());
+					}
 				}
+				return temp;
 			}
-			
-			return temp;
+			return null;
 			
 		}
 		catch(Exception e)

@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,13 +42,17 @@ public class IndexWriter {
 	private String currentAuthorOrg;
 	private Map<Integer, String> documentDictionary;
 	private Map<String, Integer> termDictionary;
-	private Map<Integer, List<Integer>> termIndex;
+	private Map<Integer, TermData> termIndex;
 	private Map<String, Integer> categoryDictionary;
-	private Map<Integer, List<Integer>> categoryIndex;
+	private Map<Integer, TermData> categoryIndex;
 	private Map<String, Integer> placeDictionary;
-	private Map<Integer, List<Integer>> placeIndex;
+	private Map<Integer, TermData> placeIndex;
 	private Map<String, String> authorDictionary;
 	private Map<String, List<Integer>> authorIndex;
+	private Map<Integer, TermData> invertedIndex;
+
+	private int N;
+	private double avgDocLen;
 	//This parameter contains the address of the folder where everything needs to be stored.
 	/**
 	 * Default constructor
@@ -79,14 +84,18 @@ public class IndexWriter {
 		}
 		this.documentDictionary = new TreeMap<Integer, String>();
 		this.termDictionary = new TreeMap<String, Integer>();
-		this.termIndex = new TreeMap<Integer, List<Integer>>();
+		this.termIndex = new TreeMap<Integer, TermData>();
 		this.categoryDictionary = new TreeMap<String, Integer>();
-		this.categoryIndex = new TreeMap<Integer, List<Integer>>();
+		this.categoryIndex = new TreeMap<Integer, TermData>();
 		this.placeDictionary = new TreeMap<String, Integer>();
-		this.placeIndex = new TreeMap<Integer, List<Integer>>();
+		this.placeIndex = new TreeMap<Integer, TermData>();
 		this.authorDictionary = new TreeMap<String, String>();
 		this.authorIndex = new TreeMap<String, List<Integer>>();
+		this.invertedIndex = new TreeMap<Integer, TermData>();
 		this.count = 1;
+
+		this.N = 0;
+		this.avgDocLen = 0.0;
 	}
 	
 	public String getIndexDir() {
@@ -325,14 +334,29 @@ public class IndexWriter {
 			{
 				int categoryId = this.categoryDictionary.get(categoryStream.next().toString());
 				if(this.categoryIndex.containsKey(categoryId)){
-					List<Integer> tempList = this.categoryIndex.get(categoryId);
+					TermData data = this.categoryIndex.get(categoryId);
+					List<Integer> tempList = data.getPostingsList();
 					tempList.add(this.currentFileId);
-					this.categoryIndex.put(categoryId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = data.getTermFrequency();
+					if(tempTF.containsKey(this.currentFileId)){
+						int tf = tempTF.get(this.currentFileId)+1;
+						tempTF.put(this.currentFileId, tf);
+					}
+					else
+						tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.categoryIndex.put(categoryId, data);
 				}
 				else{
+					TermData data = new TermData();
 					List<Integer> tempList = new ArrayList<Integer>();
 					tempList.add(this.currentFileId);
-					this.categoryIndex.put(categoryId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
+					tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.categoryIndex.put(categoryId, data);
 				}
 			}
 			
@@ -410,15 +434,31 @@ public class IndexWriter {
 			while(placeStream.hasNext())
 			{
 				int placeId = this.placeDictionary.get(placeStream.next().toString());
+				TermData data;
 				if(this.placeIndex.containsKey(placeId)){
-					List<Integer> tempList = this.placeIndex.get(placeId);
+					data = this.placeIndex.get(placeId);
+					List<Integer> tempList = data.getPostingsList();
 					tempList.add(this.currentFileId);
-					this.placeIndex.put(placeId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = data.getTermFrequency();
+					if(tempTF.containsKey(this.currentFileId)){
+						int tf = tempTF.get(this.currentFileId)+1;
+						tempTF.put(this.currentFileId, tf);
+					}
+					else
+						tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.placeIndex.put(placeId, data);
 				}
 				else{
+					data = new TermData();
 					List<Integer> tempList = new ArrayList<Integer>();
 					tempList.add(this.currentFileId);
-					this.placeIndex.put(placeId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
+					tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.placeIndex.put(placeId, data);
 				}
 			}
 			
@@ -570,7 +610,7 @@ public class IndexWriter {
 			oos.writeObject(this.termDictionary);
 			oos.flush();
 			oos.close();
-			System.out.println(this.termDictionary);
+			//System.out.println(this.termDictionary);
 			this.termDictionary.clear();
 		}
 		catch(Exception e)
@@ -586,19 +626,58 @@ public class IndexWriter {
 			{
 				int termId = this.termDictionary.get(termStream.next().toString());
 				if(this.termIndex.containsKey(termId)){
-					List<Integer> tempList = this.termIndex.get(termId);
+					TermData data = this.termIndex.get(termId);
+					List<Integer> tempList = data.getPostingsList();
 					tempList.add(this.currentFileId);
-					this.termIndex.put(termId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = data.getTermFrequency();
+					if(tempTF.containsKey(this.currentFileId)){
+						int tf = tempTF.get(this.currentFileId)+1;
+						tempTF.put(this.currentFileId, tf);
+					}
+					else
+						tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.termIndex.put(termId, data);
 				}
 				else{
+					TermData data = new TermData();
 					List<Integer> tempList = new ArrayList<Integer>();
 					tempList.add(this.currentFileId);
-					this.termIndex.put(termId, tempList);
+					data.setPostingsList(tempList);
+					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
+					tempTF.put(this.currentFileId, 1);
+					data.setTermFrequency(tempTF);
+					this.termIndex.put(termId, data);
+				}
+				
+				if(this.invertedIndex.containsKey(this.currentFileId)){
+					TermData data = this.invertedIndex.get(this.currentFileId);
+					Map<Integer, Integer> tempTF = data.getTermFrequency();
+					if(tempTF.containsKey(termId)){
+						int count = tempTF.get(termId);
+						tempTF.put(termId, count+1);
+					}
+					else{
+						tempTF.put(termId, 1);
+					}
+					data.setTermFrequency(tempTF);
+					this.invertedIndex.put(this.currentFileId, data);
+				}
+				else{
+					TermData data = new TermData();
+					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
+					tempTF.put(termId, 1);
+					data.setTermFrequency(tempTF);
+					this.invertedIndex.put(this.currentFileId, data);
 				}
 			}
 			
-			if(this.currentFileId%100 == 0)
-				writeToTermIndex();
+			if(this.currentFileId%200 == 0){
+				writeToTermIndex(false);
+				writeToInvertedIndex(false);
+				this.count++;
+			}
 			
 		}
 		catch(Exception e)
@@ -607,21 +686,53 @@ public class IndexWriter {
 		}
 	}
 	
-	private void writeToTermIndex()
+	private void writeToTermIndex(boolean isFinal)
 	{
 		try{
 			File dir = new File(this.indexDir+ File.separator+ "term");
 			if(!dir.exists())
 				dir.mkdir();
-				
-			ObjectOutputStream oos = new ObjectOutputStream(
-			        new FileOutputStream(dir.getAbsolutePath() + File.separator + "Term Index" + (this.count++) + ".ser")
-			);
+			
+			ObjectOutputStream oos;
+			
+			if(isFinal)
+				oos = new ObjectOutputStream(new FileOutputStream(dir.getAbsolutePath() + 
+						File.separator + "Term Index.ser"));
+			else
+				oos = new ObjectOutputStream(new FileOutputStream(dir.getAbsolutePath() + 
+						File.separator + "Term Index" + this.count + ".ser"));
 			oos.writeObject(this.termIndex);
 			oos.flush();
 			oos.close();
-			System.out.println("Term index"+count+": "+this.termIndex);
+			//System.out.println("Term index"+count+": "+this.termIndex);
 			this.termIndex.clear();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeToInvertedIndex(boolean isFinal)
+	{
+		try{
+			File dir = new File(this.indexDir+ File.separator+ "document");
+			if(!dir.exists())
+				dir.mkdir();
+				
+			ObjectOutputStream oos;
+			if(isFinal)
+				oos= new ObjectOutputStream(new FileOutputStream(dir.getAbsolutePath() + 
+						File.separator + "Inverted Index.ser"));
+			else
+			oos= new ObjectOutputStream(new FileOutputStream(dir.getAbsolutePath() + 
+					File.separator + "Inverted Index" + this.count + ".ser"));
+			
+			oos.writeObject(this.invertedIndex);
+			oos.flush();
+			oos.close();
+			//System.out.println("Inverted index"+count+": "+this.invertedIndex);
+			this.invertedIndex.clear();
 		}
 		catch(Exception e)
 		{
@@ -640,13 +751,16 @@ public class IndexWriter {
 			writeToCategoryIndex();
 			writeToPlaceIndex();
 			writeToAuthorIndex();
-			writeToTermIndex();
+			writeToTermIndex(false);
+			writeToInvertedIndex(false);
 			writeToDocumentDictionary();
 			writeToCategoryDictionary();
 			writeToPlaceDictionary();
 			writeToAuthorDictionary();
 			writeToTermDictionary();
 			merge();
+			mergeInvertedIndex();
+			calculate();
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -660,7 +774,7 @@ public class IndexWriter {
 		try{
 			File ipDirectory = new File(this.indexDir + File.separator + "term");
 			String[] files = ipDirectory.list();
-			Map<Integer, List<Integer>> mergedMap = new TreeMap<Integer, List<Integer>>();
+			Map<Integer, TermData> mergedMap = new TreeMap<Integer, TermData>();
 			ObjectInputStream ois;
 			
 			for(String file : files)
@@ -669,7 +783,7 @@ public class IndexWriter {
 					continue;
 				else{
 					ois = new ObjectInputStream(new FileInputStream(ipDirectory.getAbsolutePath() + File.separator + file));				
-					mergedMap = mergeFiles(mergedMap, (TreeMap<Integer, List<Integer>>) ois.readObject());
+					mergedMap = mergeFiles(mergedMap, (TreeMap<Integer, TermData>) ois.readObject());
 					ois.close();
 					//System.out.println(mergedMap.size());
 				}
@@ -694,22 +808,209 @@ public class IndexWriter {
 		}
 	}
 	
-	public Map<Integer, List<Integer>> mergeFiles(Map<Integer, List<Integer>> m1, Map<Integer, List<Integer>> m2)
+	@SuppressWarnings("unchecked")
+	public void mergeInvertedIndex()
+	{
+		//recursively merge
+		try{
+			File ipDirectory = new File(this.indexDir + File.separator + "document");
+			String[] files = ipDirectory.list();
+			Map<Integer, TermData> mergedMap = new TreeMap<Integer, TermData>();
+			ObjectInputStream ois;
+			
+			for(String file : files)
+			{
+				if(file.equals("Inverted Index.ser"))
+					continue;
+				else{
+					ois = new ObjectInputStream(new FileInputStream(ipDirectory.getAbsolutePath() + File.separator + file));				
+					mergedMap = mergeFiles(mergedMap, (TreeMap<Integer, TermData>) ois.readObject());
+					ois.close();
+					//System.out.println(mergedMap.size());
+				}
+			}
+			
+			File dir = new File(this.indexDir+ File.separator+ "document");
+			if(!dir.exists())
+				dir.mkdir();
+				
+			ObjectOutputStream oos = new ObjectOutputStream(
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator + "Inverted Index.ser")
+			);
+			oos.writeObject(mergedMap);
+			oos.flush();
+			oos.close();
+			
+			//System.out.println("Merge:"+mergedMap);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/*public Map<Integer, TermData> mergeFiles(Map<Integer, TermData> m1, Map<Integer, TermData> m2)
 	{		
-		Map<Integer, List<Integer>> mergedMap = new TreeMap<Integer, List<Integer>>();
-		Iterator<Entry<Integer, List<Integer>>> i1 = m1.entrySet().iterator();
+		Map<Integer, TermData> mergedMap = new TreeMap<Integer, TermData>();
+		Iterator<Entry<Integer, TermData>> i1 = m1.entrySet().iterator();
 		while(i1.hasNext()){
-			Entry<Integer, List<Integer>> entry = i1.next();
+			Entry<Integer, TermData> entry = i1.next();
 			mergedMap.put(entry.getKey(), entry.getValue());
 		}
 		
-		Iterator<Entry<Integer, List<Integer>>> i2 = m2.entrySet().iterator();
+		Iterator<Entry<Integer, TermData>> i2 = m2.entrySet().iterator();
 		while(i2.hasNext()){
-			Entry<Integer, List<Integer>> entry = i2.next();
+			Entry<Integer, TermData> entry = i2.next();
 			mergedMap.put(entry.getKey(), entry.getValue());
 		}
 		
 		return mergedMap;
+	}*/
+	
+	public Map<Integer, TermData> mergeFiles(Map<Integer, TermData> m1, Map<Integer, TermData> m2)
+	{		
+		Map<Integer, TermData> mergedMap = new TreeMap<Integer, TermData>();
+		Iterator<Entry<Integer, TermData>> i1 = m1.entrySet().iterator();
+		while(i1.hasNext()){
+			Entry<Integer, TermData> entry = i1.next();
+			if(mergedMap.containsKey(entry.getKey())){
+				TermData term1 = entry.getValue();
+				Map<Integer, Integer> tf1 = term1.getTermFrequency();
+				Map<Integer, Integer> tf2 = mergedMap.get(entry.getKey()).getTermFrequency();
+				
+				Iterator<Entry<Integer, Integer>> tfIterator = tf2.entrySet().iterator();
+				
+				while(tfIterator.hasNext()){
+					Entry<Integer, Integer> tempTF = tfIterator.next();
+					int key = tempTF.getKey();
+					int value = tempTF.getValue();
+					if(tf1.containsKey(key)){
+						int newTF = value + tf1.get(key);
+						tf1.put(key, newTF);
+					}
+					else{
+						tf1.put(key, value);
+					}
+				}
+				
+				List<Integer> list1 = term1.getPostingsList();
+				List<Integer> list2 = mergedMap.get(entry.getKey()).getPostingsList();
+				
+				for(Integer docId : list2){
+					if(!list1.contains(docId))
+						list1.add(docId);
+				}
+				
+				term1.setPostingsList(list1);
+				term1.setTermFrequency(tf1);
+				mergedMap.put(entry.getKey(), term1);
+			}
+			else{
+				mergedMap.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		Iterator<Entry<Integer, TermData>> i2 = m2.entrySet().iterator();
+		while(i2.hasNext()){
+			Entry<Integer, TermData> entry = i2.next();
+			if(mergedMap.containsKey(entry.getKey())){
+				TermData term1 = entry.getValue();
+				Map<Integer, Integer> tf1 = term1.getTermFrequency();
+				Map<Integer, Integer> tf2 = mergedMap.get(entry.getKey()).getTermFrequency();
+				
+				Iterator<Entry<Integer, Integer>> tfIterator = tf2.entrySet().iterator();
+				
+				while(tfIterator.hasNext()){
+					Entry<Integer, Integer> tempTF = tfIterator.next();
+					int key = tempTF.getKey();
+					int value = tempTF.getValue();
+					if(tf1.containsKey(key)){
+						int newTF = value + tf1.get(key);
+						tf1.put(key, newTF);
+					}
+					else{
+						tf1.put(key, value);
+					}
+				}
+				
+				List<Integer> list1 = term1.getPostingsList();
+				List<Integer> list2 = mergedMap.get(entry.getKey()).getPostingsList();
+				
+				for(Integer docId : list2){
+					if(!list1.contains(docId))
+						list1.add(docId);
+				}
+				
+				term1.setPostingsList(list1);				
+				term1.setTermFrequency(tf1);
+				mergedMap.put(entry.getKey(), term1);
+			}
+			else{
+				mergedMap.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		return mergedMap;
+	}
+	
+	@SuppressWarnings({ "unchecked", "resource" })
+	public void calculate(){
+		try{
+			File dir = new File(this.indexDir+ File.separator+ "document");
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Inverted Index.ser"));
+			this.invertedIndex = (TreeMap<Integer, TermData>) ois.readObject();
+			Iterator<Entry<Integer, TermData>> iterator = this.invertedIndex.entrySet().iterator();
+			
+			this.N = this.invertedIndex.size();
+			int length = 0;
+			
+			while(iterator.hasNext()){
+				Entry<Integer, TermData> doc = iterator.next();
+				TermData docData = doc.getValue();
+				int noOfTerms = docData.getTermFrequency().size();
+				length += noOfTerms;
+				docData.setDocumentLength(noOfTerms);
+				this.invertedIndex.put(doc.getKey(), docData);
+			}
+			
+			this.avgDocLen = (double) length/N;
+			
+			writeToInvertedIndex(true);
+			
+			dir = new File(this.indexDir+ File.separator+ "term");
+			ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
+			this.termIndex = (TreeMap<Integer, TermData>) ois.readObject();
+			iterator = this.termIndex.entrySet().iterator();
+			
+			while(iterator.hasNext()){
+				Entry<Integer, TermData> term = iterator.next();
+				TermData termData = term.getValue();
+				int docFreq = termData.getTermFrequency().size();
+				double idf = Math.log((double) this.N/docFreq);
+				termData.setIdf(idf);
+				this.termIndex.put(term.getKey(), termData);
+			}
+			
+			writeToTermIndex(true);
+			
+			ois.close();
+			
+			dir = new File(this.indexDir);
+			if(!dir.exists())
+				dir.mkdir();
+			
+			ObjectOutputStream oos = new ObjectOutputStream(
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Info.ser")
+			);
+			String info = this.N + " " + this.avgDocLen;
+			oos.writeObject(info);
+			oos.flush();
+			oos.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 }

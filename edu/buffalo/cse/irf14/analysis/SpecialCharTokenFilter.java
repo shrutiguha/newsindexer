@@ -28,19 +28,19 @@ public class SpecialCharTokenFilter extends TokenFilter {
 	{
 		//Where i add the filter part
 		String text = t.getTermText();
-		System.out.println(text);
+		//System.out.println(text);
 				if(text.matches("[a-zA-Z]+-[a-zA-Z]+"))
 				{
 			text=text.replaceAll("-", " ");
-			System.out.println(text);
+			//System.out.println(text);
 
 				}
 				else if(!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]+[a-zA-Z]*[-][a-zA-Z]*[0-9]+[a-zA-Z]*[^a-zA-Z0-9]*")&&!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]*[a-zA-Z]*[-][a-zA-Z]*[0-9]+[a-zA-Z]*[^a-zA-Z0-9]*")&&!text.matches("[^a-zA-Z0-9]*[a-zA-Z]*[0-9]+[a-zA-Z]*[-][a-zA-Z]*[0-9]*[a-zA-Z]+[^a-zA-Z0-9]*"))
 				text=text.replaceAll("-+", "");
-				System.out.println(text);
+				//System.out.println(text);
 
 		text=text.replaceAll("[^a-zA-Z0-9\\.\\s\\?!'-]", "");
-		System.out.println(text);
+		//System.out.println(text);
 
 
         t.setTermText(text);

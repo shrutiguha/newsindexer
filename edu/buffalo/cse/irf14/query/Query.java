@@ -9,8 +9,19 @@ public class Query {
 	/**
 	 * Method to convert given parsed query into string
 	 */
+	private String querystring;
+	
+	public String getQuerystring() {
+		return querystring;
+	}
+
+	public void setQuerystring(String querystring) {
+		this.querystring = querystring;
+	}
+
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		return null;
+		return this.querystring;
+
 	}
 }
