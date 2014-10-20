@@ -20,7 +20,8 @@ public class QueryParser {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
 		Query q=new Query();
 		String query="";
-		
+		userQuery = userQuery.replace("( ", "(");
+		userQuery = userQuery.replace(" )", ")");
 		if(userQuery == null || userQuery.equals(""))
 			throw new ParserException();
 		
@@ -72,9 +73,9 @@ public class QueryParser {
 		for(int i=0;i<len;i++)
 		{
 			
-		if(tempArray[i].matches(".*Category:[(].*"))
+		if(tempArray[i].toLowerCase().matches(".*category:[(].*"))
 			{
-				tempArray[i]=tempArray[i].replaceAll("Category:[(]", "(Category:");
+				tempArray[i]=tempArray[i].toLowerCase().replaceAll("category:[(]", "(Category:");
 								
 				int j=i+1;
 				if(j<len)
@@ -88,9 +89,9 @@ public class QueryParser {
 				tempArray[j]="Category:"+tempArray[j];
 				}
 			}
-			else if(tempArray[i].matches(".*Place:[(].*"))
+			else if(tempArray[i].toLowerCase().matches(".*place:[(].*"))
 			{
-				tempArray[i]=tempArray[i].replaceAll("Place:[(]", "(Place:");
+				tempArray[i]=tempArray[i].toLowerCase().replaceAll("place:[(]", "(Place:");
 				
 				int j=i+1;
 				while(!tempArray[j].matches(".*[)]"))
@@ -101,9 +102,9 @@ public class QueryParser {
 				}
 				tempArray[j]="Place:"+tempArray[j];
 			}
-			else if(tempArray[i].matches(".*Author:[(].*"))
+			else if(tempArray[i].toLowerCase().matches(".*author:[(].*"))
 			{
-				tempArray[i]=tempArray[i].replaceAll("Author:[(]", "(Author:");
+				tempArray[i]=tempArray[i].toLowerCase().replaceAll("author:[(]", "(Author:");
 				
 				int j=i+1;
 				while(!tempArray[j].matches(".*[)]"))
@@ -117,10 +118,10 @@ public class QueryParser {
 			else if(tempArray[i].matches("[(]+.*"))
 			{
 				String a=tempArray[i].replaceAll("[(]+", "");
-				if(!a.matches("Category:.*"))
-					if(!a.matches("Place:.*"))
-						if(!a.matches("Author:.*"))
-							if(!a.matches("Term:.*"))
+				if(!a.toLowerCase().matches("category:.*"))
+					if(!a.toLowerCase().matches("place:.*"))
+						if(!a.toLowerCase().matches("author:.*"))
+							if(!a.toLowerCase().matches("term:.*"))
 						{
 							b="Term:"+a;
 				
@@ -135,10 +136,10 @@ public class QueryParser {
 					if(tempArray[j].matches("[(]+.*"))
 						break;
 					if(!tempArray[j].matches("AND|NOT|OR"))
-						if(!tempArray[j].matches("Category:.*"))
-							if(!tempArray[j].matches("Place:.*"))
-								if(!tempArray[j].matches("Author:.*"))
-									if(!tempArray[j].matches("Term:.*"))
+						if(!tempArray[j].toLowerCase().matches("category:.*"))
+							if(!tempArray[j].toLowerCase().matches("place:.*"))
+								if(!tempArray[j].toLowerCase().matches("author:.*"))
+									if(!tempArray[j].toLowerCase().matches("term:.*"))
 									{
 											tempArray[j]="Term:"+tempArray[j];
 									}
@@ -147,10 +148,10 @@ public class QueryParser {
 					j++;
 				}
 				if(!tempArray[j].matches("AND|NOT|OR"))
-					if(!tempArray[j].matches("Category:.*"))
-						if(!tempArray[j].matches("Place:.*"))
-							if(!tempArray[j].matches("Author:.*"))
-								if(!tempArray[j].matches("Term:.*"))
+					if(!tempArray[j].toLowerCase().matches("category:.*"))
+						if(!tempArray[j].toLowerCase().matches("place:.*"))
+							if(!tempArray[j].toLowerCase().matches("author:.*"))
+								if(!tempArray[j].toLowerCase().matches("term:.*"))
 									if(!tempArray[j].matches("[(]+.*"))
 							{
 									tempArray[j]="Term:"+tempArray[j];
@@ -160,10 +161,10 @@ public class QueryParser {
 			else
 			{
 				if(!tempArray[i].matches("AND|OR|NOT"))
-				if(!tempArray[i].contains("Term:"))
-					if(!tempArray[i].contains("Category:"))
-						if(!tempArray[i].contains("Place:"))
-							if(!tempArray[i].contains("Author:"))
+				if(!tempArray[i].toLowerCase().contains("term:"))
+					if(!tempArray[i].toLowerCase().contains("category:"))
+						if(!tempArray[i].toLowerCase().contains("place:"))
+							if(!tempArray[i].toLowerCase().contains("author:"))
 					tempArray[i]="Term:"+tempArray[i];
 			}
 			
@@ -300,7 +301,20 @@ public class QueryParser {
 			
 		}
 		
+for(i=0;i<len;i++)
+{
+	if(tempArray[i].toLowerCase().contains("category:"))
+		tempArray[i]=tempArray[i].replaceAll("category:", "Category:");
 
+	if(tempArray[i].toLowerCase().contains("place:"))
+		tempArray[i]=tempArray[i].replaceAll("place:", "Place:");
+
+	if(tempArray[i].toLowerCase().contains("author:"))
+		tempArray[i]=tempArray[i].replaceAll("author:", "Author:");
+
+	if(tempArray[i].toLowerCase().contains("term:"))
+		tempArray[i]=tempArray[i].replaceAll("term:", "Term:");
+}
 		
 		
 		query="";
@@ -320,18 +334,19 @@ public class QueryParser {
 	
 	}
 	
-	/*public static void main(String[] args)
+/*	public static void main(String[] args)
 	{
 		try
 		{
-			String s=parse("(((\"x y\" AND B) OR (C AND D)) AND E)","OR");
-			if(s.contentEquals("{ [ [ [ Term:\"x y\" AND Term:B ] OR [ Term:C AND Term:D ] ] AND Term:E ] }"))
-				Query q=parse("(Love NOT War) AND Category:(movies NOT crime)","OR");
+//			String s=parse("(((\"x y\" AND B) OR (C AND D)) AND E)","OR");
+//			if(s.contentEquals("{ [ [ [ Term:\"x y\" AND Term:B ] OR [ Term:C AND Term:D ] ] AND Term:E ] }"))
+				Query q=parse("Category:oil AND place:Dubai AND (price OR cost)","OR");
 				String s=q.toString();
-			if(s.contentEquals("{ [ Term:A OR Term:B OR Term:C OR Term:D ] AND [ [ Term:E AND Term:F ] OR [ Term:G AND Term:H ] ] AND [ [ Term:I OR Term:J OR Term:K ] AND [ Term:L OR Term:M OR Term:N OR Term:O ] ] AND [ Term:P OR [ Term:Q OR [ Term:R OR [ Term:S AND Term:T ] ] ] ] }"))
-				//System.out.println("PASS");
+				System.out.println(s);
+			if(s.contentEquals("{ Category:oil AND Place:Dubai AND [ Term:price OR Term:cost ] }"))
+				System.out.println("PASS");
 			else
-				//System.out.println("FAIL");
+				System.out.println("FAIL");
 	
 	
 		}

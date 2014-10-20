@@ -150,6 +150,7 @@ public class BinaryTree {
 				
 				if(not){
 					term = term.substring(term.indexOf(':')+1, term.indexOf('>'));
+					term = term.replace("\"", "");
 					Integer id = dictionary.get(term);
 					List<Integer> postings = new ArrayList<Integer>();
 					if(id != null ){
@@ -169,6 +170,7 @@ public class BinaryTree {
 				}
 				else{
 					term = term.substring(term.indexOf(':')+1);
+					term = term.replace("\"", "");
 					Integer id = dictionary.get(term);
 					if(id != null){
 						TermData termData = index.get(dictionary.get(term));
@@ -205,6 +207,7 @@ public class BinaryTree {
 				
 				if(not){
 					term = term.substring(term.indexOf(':')+1, term.indexOf('>'));
+					term = term.replace("\"", "");
 					//String id = dictionary.get(term);
 					List<Integer> postings = new ArrayList<Integer>();
 					//if(id != null)
@@ -219,6 +222,7 @@ public class BinaryTree {
 				}
 				else{
 					term = term.substring(term.indexOf(':')+1);
+					term = term.replace("\"", "");
 					//String id = dictionary.get(term);
 					if(index.get(term) != null)
 						return index.get(term);
@@ -252,6 +256,7 @@ public class BinaryTree {
 				
 				if(not){
 					term = term.substring(term.indexOf(':')+1, term.indexOf('>'));
+					term = term.replace("\"", "");
 					Integer id = dictionary.get(term);
 					List<Integer> postings = new ArrayList<Integer>();
 					if(id != null ){
@@ -269,6 +274,7 @@ public class BinaryTree {
 				}
 				else{
 					term = term.substring(term.indexOf(':')+1);
+					term = term.replace("\"", "");
 					Integer id = dictionary.get(term);
 					if(id != null){
 						TermData termData = index.get(id);
@@ -288,6 +294,7 @@ public class BinaryTree {
 	public List<Integer> termLookUp(String term, boolean not){
 		if(not){
 			term = term.substring(term.indexOf(':')+1, term.indexOf('>'));
+			term = term.replace("\"", "");
 			Integer id = this.termDictionary.get(term);
 			List<Integer> postings = new ArrayList<Integer>();
 			if(id != null ){
@@ -305,6 +312,7 @@ public class BinaryTree {
 		}
 		else{
 			term = term.substring(term.indexOf(':')+1);
+			term = term.replace("\"", "");
 			Integer id = this.termDictionary.get(term);
 			if(id != null){
 				TermData termData = this.termIndex.get(id);

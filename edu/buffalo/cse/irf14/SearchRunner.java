@@ -3,13 +3,21 @@ package edu.buffalo.cse.irf14;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.TreeMap;
 
@@ -44,6 +52,7 @@ public class SearchRunner {
 	private Map<Integer, String> documentDictionary;
 	private Map<String, Integer> termDictionary;
 	private Map<Integer, TermData> termIndex;
+	private Map<Integer, TermData> invertedIndex;
 	
 	/**
 	 * Default (and only public) constuctor
@@ -72,18 +81,19 @@ public class SearchRunner {
 				ois.close();
 			}
 			
-			if(this.documentDictionary == null && this.termDictionary == null && this.termIndex == null){
-				dir = new File(this.indexDir);
-				if(dir.exists()){
-					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
-					this.termDictionary = (TreeMap<String, Integer>) ois.readObject();
-					ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
-					this.documentDictionary = (TreeMap<Integer, String>) ois.readObject();
-					dir = new File(this.indexDir + File.separator + "term");
-					ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
-					this.termIndex = (TreeMap<Integer, TermData>) ois.readObject();
-					ois.close();
-				}
+			dir = new File(this.indexDir);
+			if(dir.exists()){
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Dictionary.ser"));
+				this.termDictionary = (TreeMap<String, Integer>) ois.readObject();
+				ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Document Dictionary.ser"));
+				this.documentDictionary = (TreeMap<Integer, String>) ois.readObject();
+				dir = new File(this.indexDir + File.separator + "term");
+				ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Term Index.ser"));
+				this.termIndex = (TreeMap<Integer, TermData>) ois.readObject();
+				dir = new File(this.indexDir + File.separator + "document");
+				ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Inverted Index.ser"));
+				this.invertedIndex = (TreeMap<Integer, TermData>) ois.readObject();
+				ois.close();
 			}
 			
 			while(true){
@@ -94,9 +104,9 @@ public class SearchRunner {
 					case 'Q': this.stream.print("Enter query: ");
 							  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 							  String query = br.readLine();
-							  query(query, ScoringModel.TFIDF);
+							  query(query, ScoringModel.OKAPI);
 							  break;
-					default: System.out.println("Enter a valid option");
+					default: System.out.println("Invalid option");
 				}
 			}
 		}
@@ -118,25 +128,35 @@ public class SearchRunner {
 			List<Integer> resultList = new ArrayList<Integer>();
 			if(q != null){
 				String tokenizedQuery = tokenize(q);
-				//System.out.println("Query:"+tokenizedQuery);
+				System.out.println("Query:"+tokenizedQuery);
 				if(tokenizedQuery != null){
 					resultList = traverse(tokenizedQuery);
 				}
 				
+				Map<String, Integer> uniqueResultList = new HashMap<String, Integer>();
 				if(resultList.size() == 0)
 					this.stream.println("No matches found");
 				else{
-					Map<String, Integer> uniqueResultList = new HashMap<String, Integer>();
 					for(Integer docId : resultList){
 						uniqueResultList.put(this.documentDictionary.get(docId), docId);
 					}			
 					this.stream.println(uniqueResultList);
+					
+					Map<String, Integer> queryTerms = q.getQueryTerms();
+					
+					switch(model){
+					case TFIDF: 
+						Map<String, Double> rankedResultList = tfidf(queryTerms, uniqueResultList);
+						System.out.println(rankedResultList);
+						break;
+					case OKAPI: 
+						rankedResultList = okapi(queryTerms, uniqueResultList);
+						System.out.println(rankedResultList);
+						break;
+					}
 				}
 			}
-			switch(model){
-				case TFIDF: break;
-				case OKAPI: break;
-			}
+			
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -149,6 +169,78 @@ public class SearchRunner {
 	 */
 	public void query(File queryFile) {
 		//TODO: IMPLEMENT THIS METHOD
+		try{
+			int noOfQueries=0, noOfResults=0;
+			BufferedReader br = new BufferedReader(new FileReader(queryFile));
+			String line = br.readLine();
+			if(line != null){
+				noOfQueries = Integer.parseInt(line.substring(line.indexOf('=')+1));
+			}
+			
+			Map<String, String> queries = new HashMap<String, String>();
+			
+			while ((line = br.readLine()) != null) {
+				String fileId = line.substring(0, line.indexOf(':'));
+				String q = line.substring(line.indexOf('{')+1, line.indexOf('}'));
+				queries.put(fileId, q);
+			}
+			
+			Map<String, Map<String, Double>> result = new HashMap<String, Map<String, Double>>();
+			
+			Iterator<Entry<String, String>> iterator = queries.entrySet().iterator();
+			while(iterator.hasNext()){
+				Entry<String, String> entry = iterator.next();
+				String fileId = entry.getKey();
+				String userQuery = entry.getValue();
+				//System.out.println(userQuery);
+				Query q = QueryParser.parse(userQuery, "OR");
+				//System.out.println(q.toString());
+				List<Integer> resultList = new ArrayList<Integer>();
+				if(q != null){
+					String tokenizedQuery = tokenize(q);
+					//System.out.println("Query:"+tokenizedQuery);
+					if(tokenizedQuery != null){
+						resultList = traverse(tokenizedQuery);
+					}
+					
+					Map<String, Integer> uniqueResultList = new HashMap<String, Integer>();
+					if(resultList.size() > 0)
+					{
+						for(Integer docId : resultList){
+							uniqueResultList.put(this.documentDictionary.get(docId), docId);
+						}			
+						//this.stream.println(uniqueResultList);
+						Map<String, Integer> queryTerms = q.getQueryTerms();
+						 
+						Map<String, Double> rankedResultList = okapi(queryTerms, uniqueResultList);
+						result.put(fileId, rankedResultList);
+						//System.out.println(rankedResultList);
+					}
+					
+				}
+				
+			}
+			
+			String writeText = "numResults="+result.size();
+			this.stream.println(writeText);
+			
+			for(Entry<String, Map<String, Double>> entry : result.entrySet()){
+				String queryId = entry.getKey();
+				Map<String, Double> map = entry.getValue();
+				writeText = queryId+":{";
+				for(Entry<String, Double> e : map.entrySet()){
+					writeText+=e.getKey()+"#"+e.getValue()+", ";
+				}
+				writeText = writeText.substring(0, writeText.length()-2);
+				writeText+="}";
+				this.stream.println(writeText);
+			}
+			
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -156,6 +248,7 @@ public class SearchRunner {
 	 */
 	public void close() {
 		//TODO : IMPLEMENT THIS METHOD
+		this.stream.close();
 	}
 	
 	/**
@@ -205,6 +298,7 @@ public class SearchRunner {
 			
 			String tempFilter[] = query.split(" ");
 			int l=tempFilter.length;
+			Map<String, Integer> terms = new HashMap<String, Integer>();
 			
 			for(int i=0;i<tempFilter.length;i++)
 			{ 
@@ -269,6 +363,13 @@ public class SearchRunner {
 							Token t=contentStream.next();
 							
 							String ts=t.toString();
+							if(terms.containsKey(ts)){
+								int count = terms.get(ts) + 1;
+								terms.put(ts, count);
+							}
+							else{
+								terms.put(ts, 1);
+							}
 							//System.out.println("Stream: "+ts);
 							if(flag==1)
 							{
@@ -513,6 +614,7 @@ public class SearchRunner {
 				newquery=newquery+temp[i]+" ";
 			newquery=newquery.replaceAll("\\s+", " ").trim();
 			//System.out.println("FINAL:"+newquery);
+			q.setQueryTerms(terms);
 			return newquery;
 		}
 		catch(Exception e)
@@ -662,4 +764,211 @@ public class SearchRunner {
         //this.stream.println("Postings list: "+t.root.postingsList);
         return t.root.postingsList;
 	}
+	
+	public Map<String, Double> tfidf(Map<String, Integer> queryTerms, Map<String, Integer> uniqueResultList){
+		Map<String, Double> resultList = new HashMap<String, Double>();
+		Map<String, Double> rankedResultList = new LinkedHashMap<String, Double>();
+		
+		//idf values for all query terms 
+		Map<String, Double> idf = new HashMap<String, Double>();				
+		int totalQueryTF = 0;
+		for(Entry<String, Integer> entry : queryTerms.entrySet()){
+			int tf = entry.getValue();
+			totalQueryTF += tf*tf;
+			String term = entry.getKey();
+			if(this.termDictionary.get(term)!=null){
+				TermData termData = this.termIndex.get(this.termDictionary.get(term));
+				idf.put(term, termData.getIdf());		
+			}
+			else
+				idf.put(term, 0.0);
+		}
+		
+		//query vector
+		double queryED = Math.sqrt(totalQueryTF);
+		double queryVector[] = new double[queryTerms.size()];
+		int i = 0;
+		for(Entry<String, Integer> entry : queryTerms.entrySet()){
+			String term = entry.getKey();
+			int tf = entry.getValue();
+			double normalizedTF = tf/queryED;
+			queryVector[i] = normalizedTF * idf.get(term);
+			i++;
+		}
+		
+		//all document vectors
+		Map<String, Double[]> docVector = new HashMap<String, Double[]>();
+		
+		for(Entry<String, Integer> doc : uniqueResultList.entrySet()){
+			int totalDocTF = 0;
+			Integer docId = doc.getValue();
+			TermData termData = this.invertedIndex.get(docId);
+			for(Entry<Integer, Integer> entry : termData.getTermFrequency().entrySet()){
+				int tf = entry.getValue();
+				totalDocTF += tf*tf;
+			}
+			
+			double docED = Math.sqrt(totalDocTF);
+			Double singleDocVector[] = new Double[queryTerms.size()];
+			i = 0;
+			for(Entry<String, Integer> entry : queryTerms.entrySet()){
+				String term = entry.getKey();
+				int tf = 0;
+				if(this.termDictionary.get(term)!=null)
+					if(this.invertedIndex.get(docId).getTermFrequency().get(this.termDictionary.get(term))!=null)
+						tf = this.invertedIndex.get(docId).getTermFrequency().get(this.termDictionary.get(term));
+				double normalizedTF = tf/docED;
+
+				singleDocVector[i] = normalizedTF * idf.get(term);
+				i++;
+			}
+			docVector.put(doc.getKey(),singleDocVector);
+		}
+		
+		//cosine similarity
+		for(Entry<String, Double[]> entry : docVector.entrySet()){
+			Double dVector[] = entry.getValue();
+			double dotProduct = 0.0;
+			double dv = 0.0;
+			double q = 0.0;
+			for(i=0;i<queryVector.length;i++){
+				dotProduct += dVector[i] * queryVector[i];
+				dv += dVector[i] * dVector[i];
+				q += queryVector[i] * queryVector[i];
+			}
+			
+			dv = (double) Math.sqrt(dv);
+			q = (double) Math.sqrt(q);
+			
+			/*BigDecimal num = new BigDecimal(dotProduct);
+			num = num.setScale(10, BigDecimal.ROUND_HALF_UP);
+			BigDecimal den1 = new BigDecimal(dv);
+			den1 = den1.setScale(10, BigDecimal.ROUND_HALF_UP);
+			BigDecimal den2 = new BigDecimal(q);
+			den2 = den2.setScale(10, BigDecimal.ROUND_HALF_UP);
+			BigDecimal den = den1.multiply(den2);
+			num = num.setScale(10, BigDecimal.ROUND_HALF_UP);
+			BigDecimal answer = num.divide(den, 5, BigDecimal.ROUND_HALF_UP);*/
+			double answer = dotProduct/(dv*q);
+			//System.out.println("answer "+answer);
+			BigDecimal a = BigDecimal.valueOf(answer).setScale(5, BigDecimal.ROUND_HALF_UP);
+			resultList.put(entry.getKey(), a.doubleValue());
+			//resultList.put(entry.getKey(), answer);
+		}
+		
+		Iterator<Entry<String, Double>> iterator = entriesSortedByValues(resultList).iterator();
+		int count = 0;
+		while(count<10 && iterator.hasNext()){
+			Entry<String, Double> entry = iterator.next();
+			rankedResultList.put(entry.getKey(), entry.getValue());
+		}
+		
+		return rankedResultList;
+	}
+	
+	public Map<String, Double> okapi(Map<String, Integer> queryTerms, Map<String, Integer> uniqueResultList){
+		Map<String, Double> resultList = new HashMap<String, Double>();
+		Map<String, Double> rankedResultList = new LinkedHashMap<String, Double>();
+		
+		Double idf[] = new Double[queryTerms.size()];	
+		int i = 0;
+		for(Entry<String, Integer> entry : queryTerms.entrySet()){
+			String term = entry.getKey();
+			if(this.termDictionary.get(term) != null){
+				TermData termData = this.termIndex.get(this.termDictionary.get(term));
+				idf[i] = termData.getIdf();
+			}
+			else
+				idf[i] = 0.0;
+			i++;
+		}
+		
+		double k1 = 1.2;
+		double k3 = 8.0;
+		double b = 0.75;
+		
+		//query vector
+		int queryVector[] = new int[queryTerms.size()];
+		i = 0;
+		for(Entry<String, Integer> entry : queryTerms.entrySet()){
+			int tf = entry.getValue();
+			queryVector[i] = tf;
+			i++;
+		}
+		
+		//all document vectors
+		Map<Integer, Integer[]> docVector = new HashMap<Integer, Integer[]>();
+		for(Entry<String, Integer> doc : uniqueResultList.entrySet()){
+			int docId = doc.getValue();
+			TermData termData = this.invertedIndex.get(docId);
+			Integer singleDocVector[] = new Integer[queryTerms.size()];
+			i = 0;
+			for(Entry<String, Integer> qt : queryTerms.entrySet()){
+				String term = qt.getKey();
+				int tf = 0;
+				if(this.termDictionary.get(term)!=null)
+					if(this.invertedIndex.get(docId).getTermFrequency().get(this.termDictionary.get(term))!=null)
+						tf = this.invertedIndex.get(docId).getTermFrequency().get(this.termDictionary.get(term));
+				singleDocVector[i] = tf;
+				i++;
+			}
+			
+			docVector.put(docId,singleDocVector);
+			
+		}
+		
+		int length = 0;
+		for(Entry<Integer, Integer[]> entry : docVector.entrySet()){
+			Integer dVector[] = entry.getValue();
+			int docId = entry.getKey();
+			double rsv = 0.0;
+			for(i=0;i<queryVector.length;i++){
+				int tfd = dVector[i];
+				int tfq = queryVector[i];
+				int ld = this.invertedIndex.get(docId).getDocumentLength();
+				double IDF = idf[i];
+				double secondTerm = ((k1+1)*tfd)/(k1*((1-b)+b*(ld/this.avgDocLen))+tfd);
+				double thirdTerm = (k3+1)*tfq/(k3+tfq);
+				rsv += IDF * secondTerm * thirdTerm;
+			}
+			
+			int temp = (int) rsv;
+			if(temp!=0){
+				int l = String.valueOf(temp).length();
+				if(l>length)
+					length=l;
+			}
+			
+			BigDecimal a = BigDecimal.valueOf(rsv).setScale(5, BigDecimal.ROUND_HALF_UP);
+			resultList.put(this.documentDictionary.get(docId), a.doubleValue());
+		}
+		
+		Iterator<Entry<String, Double>> iterator = entriesSortedByValues(resultList).iterator();
+		int count = 0;
+		while(count<10 && iterator.hasNext()){
+			Entry<String, Double> entry = iterator.next();
+			if(length!=0){
+				BigDecimal a = BigDecimal.valueOf(entry.getValue()/(10*length)).setScale(5, BigDecimal.ROUND_HALF_UP);
+				rankedResultList.put(entry.getKey(), a.doubleValue());
+			}
+			else
+				rankedResultList.put(entry.getKey(), entry.getValue());
+			count++;
+		}		
+		
+		return rankedResultList;
+	}
+	
+	static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
+        SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<Map.Entry<K,V>>(
+            new Comparator<Map.Entry<K,V>>() {
+                @Override public int compare(Map.Entry<K,V> e1, Map.Entry<K,V> e2) {
+                    int res = e2.getValue().compareTo(e1.getValue());
+                    return res != 0 ? res : 1; // Special fix to preserve items with equal values
+                }
+            }
+        );
+        sortedEntries.addAll(map.entrySet());
+        return sortedEntries;
+    }
 }

@@ -41,7 +41,7 @@ public class Runner {
 		
 		//more? idk!
 		
-		/*File ipDirectory = new File(ipDir);
+		File ipDirectory = new File(ipDir);
 		String[] catDirectories = ipDirectory.list();
 		
 		String[] files;
@@ -75,13 +75,13 @@ public class Runner {
 		writer.close();
 		
 		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
-		System.out.println("Key terms: "+reader.getTotalKeyTerms());*/
+		System.out.println("Key terms: "+reader.getTotalKeyTerms());
 		
 		FileOutputStream outputStream = new FileOutputStream(corpusDir + File.separator + "output.txt");
-		// PrintStream stream = new PrintStream(outputStream);
+		//PrintStream stream = new PrintStream(outputStream);
 		PrintStream stream = System.out;
 		SearchRunner runner = new SearchRunner(indexDir, corpusDir, 'Q', stream);
-	
+		
 		if(runner!=null)
 			runner.close();
 		}

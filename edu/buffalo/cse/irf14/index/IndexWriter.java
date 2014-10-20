@@ -346,7 +346,7 @@ public class IndexWriter {
 					else
 						tempTF.put(this.currentFileId, 1);
 					data.setTermFrequency(tempTF);
-					this.categoryIndex.put(categoryId, data);
+					this.termIndex.put(categoryId, data);
 				}
 				else{
 					TermData data = new TermData();
@@ -356,7 +356,7 @@ public class IndexWriter {
 					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
 					tempTF.put(this.currentFileId, 1);
 					data.setTermFrequency(tempTF);
-					this.categoryIndex.put(categoryId, data);
+					this.termIndex.put(categoryId, data);
 				}
 			}
 			
@@ -900,7 +900,7 @@ public class IndexWriter {
 					if(!list1.contains(docId))
 						list1.add(docId);
 				}
-				
+
 				term1.setPostingsList(list1);
 				term1.setTermFrequency(tf1);
 				mergedMap.put(entry.getKey(), term1);
@@ -941,7 +941,8 @@ public class IndexWriter {
 						list1.add(docId);
 				}
 				
-				term1.setPostingsList(list1);				
+				term1.setPostingsList(list1);
+				
 				term1.setTermFrequency(tf1);
 				mergedMap.put(entry.getKey(), term1);
 			}
