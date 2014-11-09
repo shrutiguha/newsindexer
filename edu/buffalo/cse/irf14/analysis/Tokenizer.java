@@ -48,6 +48,7 @@ public class Tokenizer {
 			throw new TokenizerException();
 		
 		Token token;
+		str=str.toLowerCase();
 		
 		String splitArray[] = str.split(delimiter);
 		TokenStream tokenStream = new TokenStream();

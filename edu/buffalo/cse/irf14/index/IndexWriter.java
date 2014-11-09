@@ -41,6 +41,7 @@ public class IndexWriter {
 	private int currentFileId;
 	private String currentAuthorOrg;
 	private Map<Integer, String> documentDictionary;
+	private Map<String, String> snippet;
 	private Map<String, Integer> termDictionary;
 	private Map<Integer, TermData> termIndex;
 	private Map<String, Integer> categoryDictionary;
@@ -93,6 +94,7 @@ public class IndexWriter {
 		this.authorIndex = new TreeMap<String, List<Integer>>();
 		this.invertedIndex = new TreeMap<Integer, TermData>();
 		this.count = 1;
+		this.snippet = new TreeMap<String, String>();
 
 		this.N = 0;
 		this.avgDocLen = 0.0;
@@ -147,6 +149,7 @@ public class IndexWriter {
 			}
 			
 			String titles[] = d.getField(FieldNames.TITLE);
+			String snip = "{Title: "+titles[0]+"}";
 			if(titles != null){
 				for (String title : titles) {
 					titleStream.append(tokenizer.consume(title));
@@ -182,12 +185,18 @@ public class IndexWriter {
 			}
 			
 			String content[] = d.getField(FieldNames.CONTENT);
+			if(content[0].length()>125)
+				snip +="{Content: "+content[0].substring(0, 125)+"...}";
+			else
+				snip +="{Content: "+content[0]+"...}";
+			
+			this.snippet.put(fileids[0], snip);
 			if(content != null){
 				for (String con : content) {
 					contentStream.append(tokenizer.consume(con));
 				}
 			}
-			
+			//System.out.println(snip);
 			AnalyzerFactory analyzerFactory = AnalyzerFactory.getInstance();
 			
 			CategoryAnalyzer categoryAnalyzer = (CategoryAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.CATEGORY, categoryStream);
@@ -266,6 +275,7 @@ public class IndexWriter {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	private void writeToDocumentDictionary()
 	{
 		try{
@@ -278,9 +288,14 @@ public class IndexWriter {
 			);
 			oos.writeObject(this.documentDictionary);
 			oos.flush();
+			oos = new ObjectOutputStream(
+			        new FileOutputStream(dir.getAbsolutePath() + File.separator +"Snippet.ser")
+			);
+			oos.writeObject(this.snippet);
 			oos.close();
 			//System.out.println(this.documentDictionary);
 			this.documentDictionary.clear();
+			this.snippet.clear();
 		}
 		catch(Exception e)
 		{
@@ -346,7 +361,7 @@ public class IndexWriter {
 					else
 						tempTF.put(this.currentFileId, 1);
 					data.setTermFrequency(tempTF);
-					this.termIndex.put(categoryId, data);
+					this.categoryIndex.put(categoryId, data);
 				}
 				else{
 					TermData data = new TermData();
@@ -356,7 +371,7 @@ public class IndexWriter {
 					Map<Integer, Integer> tempTF = new HashMap<Integer, Integer>();
 					tempTF.put(this.currentFileId, 1);
 					data.setTermFrequency(tempTF);
-					this.termIndex.put(categoryId, data);
+					this.categoryIndex.put(categoryId, data);
 				}
 			}
 			
@@ -673,7 +688,7 @@ public class IndexWriter {
 				}
 			}
 			
-			if(this.currentFileId%200 == 0){
+			if(this.currentFileId%100 == 0){
 				writeToTermIndex(false);
 				writeToInvertedIndex(false);
 				this.count++;
@@ -761,6 +776,18 @@ public class IndexWriter {
 			merge();
 			mergeInvertedIndex();
 			calculate();
+			
+			this.documentDictionary = null;
+			this.snippet = null;
+			this.termDictionary = null;
+			this.termIndex = null;
+			this.categoryDictionary = null;
+			this.categoryIndex = null;
+			this.placeDictionary = null;
+			this.placeIndex = null;
+			this.authorDictionary = null;
+			this.authorIndex = null;
+			this.invertedIndex = null;
 		}
 		catch(Exception e){
 			e.printStackTrace();

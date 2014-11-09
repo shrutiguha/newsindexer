@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.document.ParserException;
@@ -75,15 +76,31 @@ public class Runner {
 		writer.close();
 		
 		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
-		System.out.println("Key terms: "+reader.getTotalKeyTerms());
+		System.out.println("Key terms: "+reader.getTotalKeyTerms());		
 		
-		FileOutputStream outputStream = new FileOutputStream(corpusDir + File.separator + "output.txt");
-		//PrintStream stream = new PrintStream(outputStream);
-		PrintStream stream = System.out;
-		SearchRunner runner = new SearchRunner(indexDir, corpusDir, 'Q', stream);
+		char mode = 'Q';
 		
-		if(runner!=null)
-			runner.close();
+		SearchRunner runner;
+			
+		switch(mode)
+		{
+			case 'E': 
+				FileOutputStream outputStream = new FileOutputStream(corpusDir + File.separator + "output.txt");
+				PrintStream stream = new PrintStream(outputStream);
+				runner = new SearchRunner(indexDir, corpusDir, mode, stream);
+				runner.query(new File(corpusDir + File.separator + "query.txt"));
+				break;
+			case 'Q': 
+				stream = System.out;
+				runner = new SearchRunner(indexDir, corpusDir, mode, stream);
+				while(true){
+					stream.print("Enter query: ");
+					BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+					String query = br.readLine();
+					runner.query(query, ScoringModel.OKAPI);
+				}
+			default: System.out.println("Invalid option");
+		}
 		}
 		catch(Exception e)
 		{

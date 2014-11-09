@@ -60,7 +60,7 @@ public class BinaryTree {
 			//System.out.println(focusNode.name);
 			String term = focusNode.name;
 			
-			if(term.equalsIgnoreCase("OR") || term.equalsIgnoreCase("AND"))
+			if(term.equalsIgnoreCase("or") || term.equalsIgnoreCase("and"))
 			{
 				Node leftChild = focusNode.leftChild;
 				Node rightChild = focusNode.rightChild;
@@ -69,16 +69,16 @@ public class BinaryTree {
 					String leftTerm = leftChild.name;
 					boolean not = leftTerm.contains("<");
 					
-					if(leftTerm.contains("Category")){
+					if(leftTerm.toLowerCase().contains("category")){
 						leftChild.postingsList = categoryLookUp(leftTerm, not);
 					}
-					else if(leftTerm.contains("Place")){
+					else if(leftTerm.toLowerCase().contains("place")){
 						leftChild.postingsList = placeLookUp(leftTerm, not);
 					}
-					else if(leftTerm.contains("Author")){
+					else if(leftTerm.toLowerCase().contains("author")){
 						leftChild.postingsList = authorLookUp(leftTerm, not);
 					}
-					else if(term.contains("Term")){
+					else if(term.toLowerCase().contains("term")){
 						leftChild.postingsList = termLookUp(leftTerm, not);
 					}
 				}
@@ -87,24 +87,24 @@ public class BinaryTree {
 					String rightTerm = rightChild.name;
 					boolean not = rightTerm.contains("<");
 					
-					if(rightTerm.contains("Category")){
+					if(rightTerm.toLowerCase().contains("category")){
 						rightChild.postingsList = categoryLookUp(rightTerm, not);
 					}
-					else if(rightTerm.contains("Place")){
+					else if(rightTerm.toLowerCase().contains("place")){
 						rightChild.postingsList = placeLookUp(rightTerm, not);
 					}
-					else if(rightTerm.contains("Author")){
+					else if(rightTerm.toLowerCase().contains("author")){
 						rightChild.postingsList = authorLookUp(rightTerm, not);
 					}
-					else if(rightTerm.contains("Term")){
+					else if(rightTerm.toLowerCase().contains("term")){
 						rightChild.postingsList = termLookUp(rightTerm, not);
 					}
 				}
 				
-				if(term.equalsIgnoreCase("OR")){
+				if(term.equalsIgnoreCase("or")){
 					focusNode.postingsList = or(leftChild, rightChild);
 				}
-				else if(term.equalsIgnoreCase("AND")){
+				else if(term.equalsIgnoreCase("and")){
 					focusNode.postingsList = and(leftChild, rightChild);
 				}				
 			}
@@ -112,16 +112,16 @@ public class BinaryTree {
 			{
 				boolean not = term.contains("<");
 				
-				if(term.contains("Category")){
+				if(term.toLowerCase().contains("category")){
 					focusNode.postingsList = categoryLookUp(term, not);
 				}
-				else if(term.contains("Place")){
+				else if(term.toLowerCase().contains("place")){
 					focusNode.postingsList = placeLookUp(term, not);
 				}
-				else if(term.contains("Author")){
+				else if(term.toLowerCase().contains("author")){
 					focusNode.postingsList = authorLookUp(term, not);
 				}
-				else if(term.contains("Term")){
+				else if(term.toLowerCase().contains("term")){
 					focusNode.postingsList = termLookUp(term, not);
 				}
 			}

@@ -25,18 +25,18 @@ public class AuthorAnalyzer implements Analyzer{
 	public void analyze(){
 		try{
 			TokenFilterFactory factory = TokenFilterFactory.getInstance();
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION1, this.tstream);
-			if(filter != null)
-			{
-				while (filter.increment()) {
-					
-				}
-				this.tstream = filter.getStream();
-			}
+//			TokenFilter filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION1, this.tstream);
+//			if(filter != null)
+//			{
+//				while (filter.increment()) {
+//					
+//				}
+//				this.tstream = filter.getStream();
+//			}
 			
 			this.tstream.reset();
 			
-			filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.SYMBOL, this.tstream);
 			if(filter != null)
 			{
 				while (filter.increment()) {

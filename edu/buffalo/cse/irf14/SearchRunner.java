@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
@@ -47,12 +46,14 @@ public class SearchRunner {
 	private String indexDir;
 	private String corpusDir;
 	private PrintStream stream;
+	private char mode;
 	private int N;
 	private double avgDocLen;
 	private Map<Integer, String> documentDictionary;
 	private Map<String, Integer> termDictionary;
 	private Map<Integer, TermData> termIndex;
 	private Map<Integer, TermData> invertedIndex;
+	private boolean init = true;
 	
 	/**
 	 * Default (and only public) constuctor
@@ -68,7 +69,11 @@ public class SearchRunner {
 		this.indexDir = indexDir;
 		this.corpusDir = corpusDir;
 		this.stream = stream;
+		this.mode = mode;
 		
+	}
+	
+	public void init(){
 		try{
 			File dir = new File(this.indexDir);
 			if(dir.exists())
@@ -94,26 +99,12 @@ public class SearchRunner {
 				ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() + File.separator +"Inverted Index.ser"));
 				this.invertedIndex = (TreeMap<Integer, TermData>) ois.readObject();
 				ois.close();
-			}
-			
-			while(true){
-				switch(mode)
-				{
-					case 'E': query(new File(corpusDir + File.separator + "query.txt"));
-							  break;
-					case 'Q': this.stream.print("Enter query: ");
-							  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-							  String query = br.readLine();
-							  query(query, ScoringModel.OKAPI);
-							  break;
-					default: System.out.println("Invalid option");
-				}
+				this.init = false;
 			}
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
-		
 	}
 	
 	/**
@@ -124,39 +115,82 @@ public class SearchRunner {
 	public void query(String userQuery, ScoringModel model) {
 		//TODO: IMPLEMENT THIS METHOD
 		try{
-			Query q = QueryParser.parse(userQuery, "AND");
+			long startTime = System.currentTimeMillis();
+			Query q = QueryParser.parse(userQuery, "OR");
 			List<Integer> resultList = new ArrayList<Integer>();
 			if(q != null){
 				String tokenizedQuery = tokenize(q);
-				System.out.println("Query:"+tokenizedQuery);
+				//System.out.println("Query:"+tokenizedQuery);
 				if(tokenizedQuery != null){
+					while(this.init)
+						init();
 					resultList = traverse(tokenizedQuery);
 				}
 				
 				Map<String, Integer> uniqueResultList = new HashMap<String, Integer>();
-				if(resultList.size() == 0)
-					this.stream.println("No matches found");
-				else{
+				Map<String, Double> rankedResultList = new HashMap<String, Double>();
+				if(resultList.size() != 0){
 					for(Integer docId : resultList){
 						uniqueResultList.put(this.documentDictionary.get(docId), docId);
 					}			
-					this.stream.println(uniqueResultList);
+					//this.stream.println("Filenames: "+uniqueResultList);
 					
 					Map<String, Integer> queryTerms = q.getQueryTerms();
 					
 					switch(model){
 					case TFIDF: 
-						Map<String, Double> rankedResultList = tfidf(queryTerms, uniqueResultList);
-						System.out.println(rankedResultList);
+						rankedResultList = tfidf(queryTerms, uniqueResultList);
+						//System.out.println(rankedResultList);
 						break;
 					case OKAPI: 
 						rankedResultList = okapi(queryTerms, uniqueResultList);
-						System.out.println(rankedResultList);
+						//System.out.println(rankedResultList);
 						break;
 					}
 				}
+				
+				File dir = new File(this.indexDir);
+				Map<String, String> snippet = new HashMap<String, String>();
+				if(dir.exists())
+				{
+					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir.getAbsolutePath() 
+							+ File.separator +"Snippet.ser"));
+					snippet = ((Map<String, String>) ois.readObject());
+					ois.close();
+				}
+				
+				this.stream.println();
+				this.stream.println("******************************");
+				this.stream.println();
+				
+				long endTime = System.currentTimeMillis();
+				
+				this.stream.println("Query: "+ userQuery);
+				this.stream.println("Query time: "+ (endTime-startTime)+"ms");
+				if(rankedResultList.size() == 0)
+					this.stream.println("NO RESULTS FOUND");
+				else{
+					int rank = 1;
+					for(Entry<String, Double> entry : rankedResultList.entrySet()){
+						this.stream.println("----------          ----------");
+						this.stream.println("Rank: "+ rank);
+						rank++;
+						if(entry.getValue()>1)
+							this.stream.println("Relevance: 1.00000");
+						else
+							this.stream.println("Relevance: "+ entry.getValue());
+						String s = snippet.get(entry.getKey());
+						String title = s.substring(s.indexOf("Title: "), s.indexOf("}"));
+						this.stream.println(title);
+						String content = s.substring(s.indexOf("Content: "), s.length()-1);
+						this.stream.println(content);
+					}
+				}
+				
+				this.stream.println();
+				this.stream.println("******************************");
+				this.stream.println();
 			}
-			
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -200,6 +234,8 @@ public class SearchRunner {
 					String tokenizedQuery = tokenize(q);
 					//System.out.println("Query:"+tokenizedQuery);
 					if(tokenizedQuery != null){
+						while(this.init)
+							init();
 						resultList = traverse(tokenizedQuery);
 					}
 					
@@ -229,7 +265,10 @@ public class SearchRunner {
 				Map<String, Double> map = entry.getValue();
 				writeText = queryId+":{";
 				for(Entry<String, Double> e : map.entrySet()){
-					writeText+=e.getKey()+"#"+e.getValue()+", ";
+					if(e.getValue()>1)
+						writeText+=e.getKey()+"#1.00000, ";
+					else
+						writeText+=e.getKey()+"#"+e.getValue()+", ";
 				}
 				writeText = writeText.substring(0, writeText.length()-2);
 				writeText+="}";
@@ -290,8 +329,11 @@ public class SearchRunner {
 	}
 	
 	public String tokenize(Query q){
+
+		String query = q.toString();
+		query=query.toLowerCase();
 		try{
-			String query = q.toString();
+			//System.out.println("Initial:"+query);
 			Tokenizer tokenizer = new Tokenizer();
 			AnalyzerFactory analyzerFactory = AnalyzerFactory.getInstance();
 
@@ -330,18 +372,20 @@ public class SearchRunner {
 						break;
 				}
 			}
+			
+			
 			   
 			for(int i=0;i<l;i++)
 			{
-				if(tempFilter[i].contains("Term:"))
+				if(tempFilter[i].contains("term:")&& !tempFilter[i].matches(".*\".*\""))
 				{
 					TokenStream contentStream = new TokenStream();
 					int flag=0;
-					if(tempFilter[i].matches("[<]Term:.*[>]"))
+					if(tempFilter[i].matches("[<]term:.*[>]"))
 					{
 						flag=1;
 						String r=tempFilter[i];
-						r=r.replaceAll("[<]Term:", "");
+						r=r.replaceAll("[<]term:", "");
 
 						r=r.replaceAll("[>]", "");
 						contentStream.append(tokenizer.consume(r));
@@ -349,7 +393,7 @@ public class SearchRunner {
 					else
 					{
 						String r=tempFilter[i];
-						r=r.replaceAll("Term:", "");
+						r=r.replaceAll("term:", "");
 						contentStream.append(tokenizer.consume(r));
 					}
 					
@@ -373,25 +417,25 @@ public class SearchRunner {
 							//System.out.println("Stream: "+ts);
 							if(flag==1)
 							{
-								tempFilter[i]="<Term:"+ts+">";
+								tempFilter[i]="<term:"+ts+">";
 							}
 							else
-								tempFilter[i]="Term:"+ts;
+								tempFilter[i]="term:"+ts;
 						}
 					}
 					else
 						tempFilter[i]=null;				
 				}
-				else if(tempFilter[i].contains("Category:"))
+				else if(tempFilter[i].contains("category:")&&!tempFilter[i].matches(".*\".*\""))
 				{
 					TokenStream categoryStream = new TokenStream();
 					
 					int flag=0;
-					if(tempFilter[i].matches("[<]Category:.*[>]"))
+					if(tempFilter[i].matches("[<]category:.*[>]"))
 					{
 						flag=1;
 						String r=tempFilter[i];
-						r=r.replaceAll("[<]Category:", "");
+						r=r.replaceAll("[<]category:", "");
 
 						r=r.replaceAll("[>]", "");
 						categoryStream.append(tokenizer.consume(r));
@@ -399,7 +443,7 @@ public class SearchRunner {
 					else
 					{
 						String r=tempFilter[i];
-						r=r.replaceAll("Category:", "");
+						r=r.replaceAll("category:", "");
 						categoryStream.append(tokenizer.consume(r));
 					}
 					
@@ -415,25 +459,25 @@ public class SearchRunner {
 							//System.out.println("Stream: "+ts);
 							if(flag==1)
 							{
-								tempFilter[i]="<Category:"+ts+">";
+								tempFilter[i]="<category:"+ts+">";
 							}
 							else
-								tempFilter[i]="Category:"+ts;
+								tempFilter[i]="category:"+ts;
 						
 						}
 					}
 					else
 						tempFilter[i]=null;
 				}
-				else if(tempFilter[i].contains("Author:"))
+				else if(tempFilter[i].contains("author:")&&!tempFilter[i].matches(".*\".*\""))
 				{
 					TokenStream authorStream = new TokenStream();
 					int flag=0;
-					if(tempFilter[i].matches("[<]Author:.*[>]"))
+					if(tempFilter[i].matches("[<]author:.*[>]"))
 					{
 						flag=1;
 						String r=tempFilter[i];
-						r=r.replaceAll("[<]Author:", "");
+						r=r.replaceAll("[<]author:", "");
 
 						r=r.replaceAll("[>]", "");
 						authorStream.append(tokenizer.consume(r));
@@ -441,7 +485,7 @@ public class SearchRunner {
 					else
 					{
 						String r=tempFilter[i];
-						r=r.replaceAll("Author:", "");
+						r=r.replaceAll("author:", "");
 						authorStream.append(tokenizer.consume(r));
 					}
 					AuthorAnalyzer authorAnalyzer = (AuthorAnalyzer) analyzerFactory.getAnalyzerForField(FieldNames.AUTHOR, authorStream);
@@ -458,24 +502,24 @@ public class SearchRunner {
 							//System.out.println("Stream: "+ts);
 							if(flag==1)
 							{
-								tempFilter[i]="<Author:"+ts+">";
+								tempFilter[i]="<author:"+ts+">";
 							}
 							else
-								tempFilter[i]="Author:"+ts;
+								tempFilter[i]="author:"+ts;
 						}
 					}
 					else
 						tempFilter[i]=null;
 				}
-				else if(tempFilter[i].contains("Place:"))
+				else if(tempFilter[i].contains("place:")&&!tempFilter[i].matches(".*\".*\""))
 				{
 					TokenStream placeStream = new TokenStream();
 					int flag=0;
-					if(tempFilter[i].matches("[<]Place:.*[>]"))
+					if(tempFilter[i].matches("[<]place:.*[>]"))
 					{
 						flag=1;
 						String r=tempFilter[i];
-						r=r.replaceAll("[<]Place:", "");
+						r=r.replaceAll("[<]place:", "");
 
 						r=r.replaceAll("[>]", "");
 						placeStream.append(tokenizer.consume(r));
@@ -483,7 +527,7 @@ public class SearchRunner {
 					else
 					{
 						String r=tempFilter[i];
-						r=r.replaceAll("Place:", "");
+						r=r.replaceAll("place:", "");
 						placeStream.append(tokenizer.consume(r));
 					}
 					
@@ -501,15 +545,76 @@ public class SearchRunner {
 						
 							if(flag==1)
 							{
-								tempFilter[i]="<Place:"+ts+">";
+								tempFilter[i]="<place:"+ts+">";
 							}
 							else
-								tempFilter[i]="Place:"+ts;
+								tempFilter[i]="place:"+ts;
 						}
 					}
 					else
 						tempFilter[i]=null;
 				}
+			}
+			
+			for(int i=0;i<l;i++)
+			{
+				if(tempFilter[i].matches("category:\".*\""))
+				{
+					int j=0;
+					tempFilter[i]=tempFilter[i].replaceAll("\"", "");
+					tempFilter[i]=tempFilter[i].replaceAll("category:", "");
+					String w[]=tempFilter[i].split(" ");
+					tempFilter[i]="";
+					for(j=0;j<w.length-1;j++)
+					{
+						tempFilter[i]=tempFilter[i]+"category:"+w[j]+" and ";
+					}
+					tempFilter[i]=tempFilter[i]+"category:"+w[j];
+					//System.out.println(tempFilter[i]);
+				}
+				else if(tempFilter[i].matches("author:\".*\""))
+				{
+					int j=0;
+					tempFilter[i]=tempFilter[i].replaceAll("\"", "");
+					tempFilter[i]=tempFilter[i].replaceAll("author:", "");
+					String w[]=tempFilter[i].split(" ");
+					tempFilter[i]="";
+					for(j=0;j<w.length-1;j++)
+					{
+						tempFilter[i]=tempFilter[i]+"author:"+w[j]+" and ";
+					}
+					tempFilter[i]=tempFilter[i]+"author:"+w[j];
+					//System.out.println(tempFilter[i]);
+				}
+				else if(tempFilter[i].matches("place:\".*\""))
+				{
+					int j=0;
+					tempFilter[i]=tempFilter[i].replaceAll("\"", "");
+					tempFilter[i]=tempFilter[i].replaceAll("place:", "");
+					String w[]=tempFilter[i].split(" ");
+					tempFilter[i]="";
+					for(j=0;j<w.length-1;j++)
+					{
+						tempFilter[i]=tempFilter[i]+"place:"+w[j]+" and ";
+					}
+					tempFilter[i]=tempFilter[i]+"place:"+w[j];
+					//System.out.println(tempFilter[i]);
+				}
+				else if(tempFilter[i].matches("term:\".*\""))
+				{
+					int j=0;
+					tempFilter[i]=tempFilter[i].replaceAll("\"", "");
+					tempFilter[i]=tempFilter[i].replaceAll("term:", "");
+					String w[]=tempFilter[i].split(" ");
+					tempFilter[i]="";
+					for(j=0;j<w.length-1;j++)
+					{
+						tempFilter[i]=tempFilter[i]+"term:"+w[j]+" and ";
+					}
+					tempFilter[i]=tempFilter[i]+"term:"+w[j];
+					//System.out.println(tempFilter[i]);
+				}
+					
 			}
 
 			for(int i=0;i<l;i++)
@@ -518,7 +623,7 @@ public class SearchRunner {
 				{
 					if(i-1>=1)
 					{
-						if(tempFilter[i-1].matches("AND|OR"))
+						if(tempFilter[i-1].toLowerCase().matches("and|or"))
 						{
 							tempFilter[i]="";
 							tempFilter[i-1]="";
@@ -526,7 +631,7 @@ public class SearchRunner {
 						else
 						{
 							if(i+1<l)
-								if(tempFilter[i+1].matches("AND|OR"))
+								if(tempFilter[i+1].toLowerCase().matches("and|or"))
 								{
 									tempFilter[i]="";
 									tempFilter[i+1]="";
@@ -536,7 +641,7 @@ public class SearchRunner {
 					else
 					{
 						if(i+1<l)
-							if(tempFilter[i+1].matches("AND|OR"))
+							if(tempFilter[i+1].toLowerCase().matches("and|or"))
 							{
 								tempFilter[i]="";
 								tempFilter[i+1]="";
@@ -598,7 +703,7 @@ public class SearchRunner {
 				if(temp[i].contentEquals("["))
 				{
 					if(i+1<l)
-					if(temp[i+1].matches(".*Term:.*")||temp[i+1].matches(".*Category:.*")||temp[i+1].matches(".*Place:.*")||temp[i+1].matches(".*Author:.*"))
+					if(temp[i+1].toLowerCase().matches(".*term:.*")||temp[i+1].toLowerCase().matches(".*category:.*")||temp[i+1].toLowerCase().matches(".*place:.*")||temp[i+1].toLowerCase().matches(".*author:.*"))
 					if(i+2<l)
 					if(temp[i+2].contentEquals("]"))
 					{
@@ -622,7 +727,7 @@ public class SearchRunner {
 			e.printStackTrace();
 		}
 		
-		return null;
+		return query;
 
 	}
 
@@ -672,6 +777,7 @@ public class SearchRunner {
 		t.setIndexDir(this.indexDir);
 		t.setTermDictionary(this.termDictionary);
 		t.setTermIndex(this.termIndex);
+		t.setDocumentDictionary(this.documentDictionary);
 
 	    Stack operands=new Stack();
 	    Stack operators=new Stack();
@@ -727,7 +833,7 @@ public class SearchRunner {
 				operands.push(root);
 
 			}
-			else if(!tempTree[i].contentEquals("AND")&&!tempTree[i].contentEquals("OR"))
+			else if(!tempTree[i].equalsIgnoreCase("AND")&&!tempTree[i].equalsIgnoreCase("OR"))
 			{	
 				Node z=new Node(tempTree[i]);
 				operands.push(z);
@@ -849,10 +955,14 @@ public class SearchRunner {
 			BigDecimal den = den1.multiply(den2);
 			num = num.setScale(10, BigDecimal.ROUND_HALF_UP);
 			BigDecimal answer = num.divide(den, 5, BigDecimal.ROUND_HALF_UP);*/
-			double answer = dotProduct/(dv*q);
+			Double answer = dotProduct/(dv*q);
 			//System.out.println("answer "+answer);
+			if(answer.isNaN())
+				resultList.put(entry.getKey(), 1.0);
+			else{
 			BigDecimal a = BigDecimal.valueOf(answer).setScale(5, BigDecimal.ROUND_HALF_UP);
 			resultList.put(entry.getKey(), a.doubleValue());
+			}
 			//resultList.put(entry.getKey(), answer);
 		}
 		
@@ -861,6 +971,7 @@ public class SearchRunner {
 		while(count<10 && iterator.hasNext()){
 			Entry<String, Double> entry = iterator.next();
 			rankedResultList.put(entry.getKey(), entry.getValue());
+			count++;
 		}
 		
 		return rankedResultList;

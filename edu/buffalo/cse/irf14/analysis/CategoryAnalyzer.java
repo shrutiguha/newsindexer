@@ -36,14 +36,14 @@ public class CategoryAnalyzer implements Analyzer{
 			
 			this.tstream.reset();
 			
-			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, this.tstream);
-			if(filter != null)
-			{
-				while (filter.increment()) {
-					
-				}
-				this.tstream = filter.getStream();
-			}
+//			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, this.tstream);
+//			if(filter != null)
+//			{
+//				while (filter.increment()) {
+//					
+//				}
+//				this.tstream = filter.getStream();
+//			}
 			
 			this.tstream.reset();
 			
